@@ -14,7 +14,7 @@ MCC-FAEA is a demonstration-free robotic manipulation reproduction of **FAEA** (
 
 ## 🎬 Demo videos — what MCC received, what it did, and which components fired
 
-Recorded at 256×256 / 20 fps inside the simulation. All control code below was
+Recorded at 256×256 / 20 fps inside the simulation (inline GIFs at 8 fps; full mp4 linked under each). All control code below was
 written by MCC itself — `episode.py` issues absolute end-effector pose targets
 through the documented wrapper API.
 
@@ -42,7 +42,9 @@ source — which one session even read back to audit itself).
 
 ### 1. LIBERO-Object task 0 — success in a single try (14 turns, 1 try)
 
-![object_0 success](results-sample/p1_pilot/libero_object_0/video.mp4)
+![object_0 success](results-sample/p1_pilot/libero_object_0/demo.gif)
+
+*(mp4: [results-sample/p1_pilot/libero_object_0/video.mp4](results-sample/p1_pilot/libero_object_0/video.mp4))*
 
 - **Received:** "pick up the alphabet soup and place it in the basket" + a
   few-shot example that happens to BE the solution to this exact task (the
@@ -59,7 +61,9 @@ source — which one session even read back to audit itself).
 
 ### 2. LIBERO-Long #36 — fastest long-horizon success (23 turns, 5 tries, 9.4 min)
 
-![90_36 success](results-sample/p1_pilot/libero_90_36/video.mp4)
+![90_36 success](results-sample/p1_pilot/libero_90_36/demo.gif)
+
+*(mp4: [results-sample/p1_pilot/libero_90_36/video.mp4](results-sample/p1_pilot/libero_90_36/video.mp4))*
 
 - **Received:** a long-horizon cabinet task + the same contract files.
 - **How it went:** textbook agentic loop. Turns 1–4 recon (README, example,
@@ -76,7 +80,9 @@ source — which one session even read back to audit itself).
 
 ### 3. LIBERO-Spatial #3 — trial-and-error success (65 turns, 6 tries)
 
-![spatial_3 success](results-sample/p1_pilot/libero_spatial_3/video.mp4)
+![spatial_3 success](results-sample/p1_pilot/libero_spatial_3/demo.gif)
+
+*(mp4: [results-sample/p1_pilot/libero_spatial_3/video.mp4](results-sample/p1_pilot/libero_spatial_3/video.mp4))*
 
 - **Received:** a spatial-reasoning task where the target's location must be
   inferred from scene layout — the suite where this model mostly fails.
@@ -95,7 +101,9 @@ source — which one session even read back to audit itself).
 
 ### 4. LIBERO-Goal #0 — honest failure (86 turns, 10-try cap exhausted)
 
-![goal_0 failure](results-sample/p1_pilot/libero_goal_0/video.mp4)
+![goal_0 failure](results-sample/p1_pilot/libero_goal_0/demo.gif)
+
+*(mp4: [results-sample/p1_pilot/libero_goal_0/video.mp4](results-sample/p1_pilot/libero_goal_0/video.mp4))*
 
 - **Received:** "open the middle drawer of the cabinet" — an articulated-
   object task. The wrapper exposes no handle joint in `get_obs()`, and the

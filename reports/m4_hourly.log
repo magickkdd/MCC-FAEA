@@ -22,3 +22,5 @@ note: runner exited (alive=0); watch log shows M4-DONE 2026-10-18 09:46:26 done=
 done=120/120 verified_ok=25 unverified=0 llm_fail=0 infra=1 | alive=0
 0 cur=libero_90_44 provider=sensenova cap=10
 note: watch_log_tail=M5-start (M4-DONE seen at 09:46:26, runner alive=0), WATCHER-DONE not present
+[2026-10-18 21:02:05] done=120/120 verified_ok=25 unverified=0 llm_fail=0 infra=1 | alive=2 cur=libero_90_44 provider=sensenova cap=10
+note: runner alive (pid=1383746 stage=p3_coaching_retry), watch_log_tail=M5-start (M4-DONE seen 09:46:26), WATCHER-DONE not present -> M4-ended mark not applied
