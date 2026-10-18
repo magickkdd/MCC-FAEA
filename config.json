@@ -1,0 +1,36 @@
+{
+  "llm": {
+    "models": {
+      "sensenova": "sensenova-6.8-flash-lite",
+      "agnes": "agnes-3.0-flash"
+    }
+  },
+  "stages": {
+    "p0_prompt_dev": {
+      "max_turns": 120,
+      "trial_cap": null
+    },
+    "p1_pilot": {
+      "max_turns": 100,
+      "trial_cap": 10
+    },
+    "p2_baseline_retry": {
+      "max_turns": 120,
+      "trial_cap": null
+    },
+    "p3_coaching_retry": {
+      "max_turns": 120,
+      "trial_cap": null
+    }
+  },
+  "max_total_tokens": 6000000,
+  "task_walltime_min": 120,
+  "video": {
+    "res": 256,
+    "fps": 20
+  },
+  "seed": 0,
+  "mcc_dir": "/home/czx/MiniClaudeCode",
+  "mcc_python": "/home/czx/miniforge3/envs/mcc/bin/python",
+  "libero_python": "/home/czx/miniforge3/envs/libero/bin/python"
+}

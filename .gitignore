@@ -1,0 +1,6 @@
+secrets.local.json
+results/
+reports/
+__pycache__/
+*.pyc
+.mcc/
