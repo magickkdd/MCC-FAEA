@@ -12,6 +12,29 @@ MCC-FAEA is a demonstration-free robotic manipulation reproduction of **FAEA** (
 | LIBERO-Long (90) | 19.3% | 68.9% |
 | **Average** | **20.8%** | **70.6%** |
 
+## 🎬 Demo videos
+
+Recorded at 256×256 / 20 fps inside the simulation. Left column: successful
+episodes discovered by the agent; right: an honest failure (10-trial budget
+burned). The agent wrote all control code itself — `episode.py` issues absolute
+end-effector pose targets through the documented wrapper API.
+
+**LIBERO-Object task 0 — success in a single try** (14 ReAct turns, few-shot example injected):
+
+![object_0 success](results-sample/p1_pilot/libero_object_0/video.mp4)
+
+**LIBERO-Long #36 — fastest long-horizon success** (23 turns, 5 tries, 9.4 min):
+
+![90_36 success](results-sample/p1_pilot/libero_90_36/video.mp4)
+
+**LIBERO-Spatial #3 — trial-and-error success** (the only Spatial pass):
+
+![spatial_3 success](results-sample/p1_pilot/libero_spatial_3/video.mp4)
+
+**LIBERO-Goal #0 — honest failure** (86 turns, 10-trial cap exhausted; the Goal suite stayed at 0%):
+
+![goal_0 failure](results-sample/p1_pilot/libero_goal_0/video.mp4)
+
 Curated evidence lives in [`results-sample/`](results-sample/README.md) (success/failure/cheating case studies with full traces and videos) and [`reports/`](reports/) (stage reports with paper-comparison tables).
 
 ## 📁 1. Repository Structure
