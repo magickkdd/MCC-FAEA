@@ -1,0 +1,14 @@
+stage,task_id,suite,outcome,flagged,tries,turns,tokens_in,tokens_out,wall_time_s,model,provider,language
+p1_pilot,libero_90_0,libero_90,max_turns,,10,100,1793001,62290,2969.4,sensenova-6.8-flash-lite,sensenova,close the top drawer of the cabinet
+p1_pilot,libero_90_1,libero_90,task_failed,,1,86,1552649,37558,3029.0,sensenova-6.8-flash-lite,sensenova,close the top drawer of the cabinet and put the black bowl on top of it
+p1_pilot,libero_goal_0,libero_goal,task_failed,,10,86,1651376,37599,2588.4,sensenova-6.8-flash-lite,sensenova,open the middle drawer of the cabinet
+p1_pilot,libero_goal_1,libero_goal,task_failed,,9,61,1093419,29918,2738.9,sensenova-6.8-flash-lite,sensenova,put the bowl on the stove
+p1_pilot,libero_object_0,libero_object,success_verified,,1,14,89119,1610,178.6,sensenova-6.8-flash-lite,sensenova,pick up the alphabet soup and place it in the basket
+p1_pilot,libero_object_1,libero_object,task_failed,,1,43,738364,15062,1690.9,sensenova-6.8-flash-lite,sensenova,pick up the cream cheese and place it in the basket
+p1_pilot,libero_object_2,libero_object,success_verified,,1,11,106603,2264,251.7,sensenova-6.8-flash-lite,sensenova,pick up the salad dressing and place it in the basket
+p1_pilot,libero_spatial_0,libero_spatial,task_failed,,1,42,727613,7730,911.5,agnes-3.0-flash,agnes,pick up the black bowl between the plate and the ramekin and place it on the plate
+p1_pilot,libero_spatial_1,libero_spatial,task_failed,,11,53,942447,16834,870.8,agnes-3.0-flash,agnes,pick up the black bowl next to the ramekin and place it on the plate
+p1_pilot,libero_spatial_2,libero_spatial,task_failed,,1,20,280372,6060,656.0,sensenova-6.8-flash-lite,sensenova,pick up the black bowl from table center and place it on the plate
+p1_pilot,libero_spatial_3,libero_spatial,success_verified,,10,65,1085388,18941,915.0,agnes-3.0-flash,agnes,pick up the black bowl on the cookie box and place it on the plate
+p1_pilot,libero_spatial_4,libero_spatial,llm_failure,,4,34,476645,4249,627.3,agnes-3.0-flash,agnes,pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate
+p1_pilot,libero_spatial_5,libero_spatial,task_failed,,4,19,191314,5556,460.2,sensenova-6.8-flash-lite,sensenova,pick up the black bowl on the ramekin and place it on the plate

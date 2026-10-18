@@ -1,0 +1,2 @@
+{"success": false, "num_tries": 4, "final_try": 4,
+ "note": "Env reached 2 successful-reset cap across the session; the pull-toward -x episode was written but could not be executed to produce a live success flag. Analysis: cabinet middle drawer is a hinge (axis +y, range [-0.16, 0.01], handle offset +z above pivot). Negative rotation around +y maps +z to -x, so the correct action is to pull the handle toward -x — the earlier +y/-y pushes never moved the hinge."}

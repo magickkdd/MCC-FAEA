@@ -1,0 +1,77 @@
+"""LIBERO libero_object_0: pick up the alphabet soup and place it in the basket.
+
+Single-episode, deterministic script. Uses only env.check_success() as the
+success metric.
+"""
+import json
+import numpy as np
+from sim.libero_env import LiberoEnv
+
+TASK_ID = "libero_object_0"
+SOUP = "alphabet_soup_1_main"
+BASKET = "basket_1_main"
+
+# Gripper pointing straight down (axis-angle: pi about x-axis)
+TOP_DOWN = np.array([np.pi, 0.0, 0.0])
+
+
+def make_move_env():
+    return LiberoEnv(task_id=TASK_ID, record_video=True, max_steps=1500)
+
+
+def move_to(env, pos, gripper=1.0, steps=40, ori=TOP_DOWN):
+    """Drive the end-effector to an absolute target pose."""
+    pos = np.asarray(pos, dtype=float)
+    for _ in range(steps):
+        obs, _, done, _ = env.step([*pos.tolist(), *ori.tolist(), gripper])
+        if done:
+            break
+    return obs
+
+
+def hold_gripper(env, gripper, steps=15):
+    """Keep current position, drive gripper open (+1) / closed (-1)."""
+    eef = env.get_obs()["eef_pos"]
+    for _ in range(steps):
+        env.step([*eef, *TOP_DOWN.tolist(), gripper])
+
+
+def main():
+    env = make_move_env()
+    obs = env.reset()
+
+    soup_pos = np.array(obs["objects"][SOUP]["pos"])
+    basket_pos = np.array(obs["objects"][BASKET]["pos"])
+
+    # 1) Approach: hover above the soup can at a safe height.
+    move_to(env, [soup_pos[0], soup_pos[1], 0.25], gripper=1.0, steps=40)
+    # 2) Descend to grasp height (soup can top is ~6cm off the table).
+    move_to(env, [soup_pos[0], soup_pos[1], 0.06], gripper=1.0, steps=50)
+    # 3) Close the gripper around the can.
+    hold_gripper(env, gripper=-1.0, steps=20)
+
+    soup_pos = np.array(env.get_obs()["objects"][SOUP]["pos"])
+
+    # 4) Lift the can out of the table.
+    move_to(env, [soup_pos[0], soup_pos[1], 0.25], gripper=-1.0, steps=40)
+    # 5) Translate over the basket.
+    move_to(env, [basket_pos[0], basket_pos[1], 0.25], gripper=-1.0, steps=50)
+    # 6) Lower the can into the basket.
+    move_to(env, [basket_pos[0], basket_pos[1], 0.05], gripper=-1.0, steps=50)
+    # 7) Open the gripper to release.
+    hold_gripper(env, gripper=1.0, steps=20)
+
+    success = env.check_success()
+    env.save_video()
+    env.close()
+
+    json.dump(
+        {"success": bool(success), "num_tries": 1, "final_try": 1},
+        open("meta.json", "w"),
+    )
+    return success
+
+
+if __name__ == "__main__":
+    ok = main()
+    print(f"SUCCESS: {ok}")

@@ -1,0 +1,40 @@
+{
+ "stage": "p1_pilot",
+ "suite": "libero_spatial",
+ "task_id": "libero_spatial_3",
+ "language": "pick up the black bowl on the cookie box and place it on the plate",
+ "model": "agnes-3.0-flash",
+ "provider": "agnes",
+ "mcc_exit_code": 1,
+ "outcome": "success_verified",
+ "flagged": [],
+ "verified": {
+  "rerun_success": true,
+  "meta": {
+   "success": true,
+   "num_tries": 10,
+   "final_try": 10
+  }
+ },
+ "video_source": "latest",
+ "detail": {
+  "meta": {
+   "success": true,
+   "num_tries": 10,
+   "final_try": 10
+  }
+ },
+ "wall_time_s": 915.0,
+ "turns": 65,
+ "tokens_in": 1085388,
+ "tokens_out": 18941,
+ "tool_calls": {
+  "bash": 45,
+  "write_todos": 4,
+  "write_file": 10,
+  "edit_file": 1,
+  "read_file": 5
+ },
+ "tries": 10,
+ "ts": "2026-10-16 23:57:08"
+}

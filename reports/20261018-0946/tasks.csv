@@ -1,0 +1,121 @@
+stage,task_id,suite,outcome,flagged,tries,turns,tokens_in,tokens_out,wall_time_s,model,provider,language
+p1_pilot,libero_90_0,libero_90,max_turns,,10,100,1793001,62290,2969.4,sensenova-6.8-flash-lite,sensenova,close the top drawer of the cabinet
+p1_pilot,libero_90_1,libero_90,task_failed,,1,86,1552649,37558,3029.0,sensenova-6.8-flash-lite,sensenova,close the top drawer of the cabinet and put the black bowl on top of it
+p1_pilot,libero_90_10,libero_90,task_failed,,10,70,1231138,26141,1495.4,sensenova-6.8-flash-lite,sensenova,put the black bowl on top of the cabinet
+p1_pilot,libero_90_11,libero_90,task_failed,,10,50,813884,13277,1677.8,sensenova-6.8-flash-lite,sensenova,open the top drawer of the cabinet
+p1_pilot,libero_90_12,libero_90,task_failed,,9,46,746720,10831,622.9,agnes-3.0-flash,agnes,put the black bowl at the back on the plate
+p1_pilot,libero_90_13,libero_90,task_failed,,10,47,809426,37022,1651.0,sensenova-6.8-flash-lite,sensenova,put the black bowl at the front on the plate
+p1_pilot,libero_90_14,libero_90,task_failed,,10,31,463239,26953,1367.5,sensenova-6.8-flash-lite,sensenova,put the middle black bowl on the plate
+p1_pilot,libero_90_15,libero_90,task_failed,,7,100,1920648,65917,3725.5,sensenova-6.8-flash-lite,sensenova,put the middle black bowl on top of the cabinet
+p1_pilot,libero_90_16,libero_90,task_failed,,10,99,1702536,43967,2813.8,sensenova-6.8-flash-lite,sensenova,stack the black bowl at the front on the black bowl in the middle
+p1_pilot,libero_90_17,libero_90,max_turns,,10,100,1778456,68063,4339.7,sensenova-6.8-flash-lite,sensenova,stack the middle black bowl on the back black bowl
+p1_pilot,libero_90_18,libero_90,max_turns,,10,100,1814670,74671,3439.2,sensenova-6.8-flash-lite,sensenova,put the frying pan on the stove
+p1_pilot,libero_90_19,libero_90,max_turns,,11,100,1750238,74603,3869.7,sensenova-6.8-flash-lite,sensenova,put the moka pot on the stove
+p1_pilot,libero_90_2,libero_90,task_failed,,10,100,1920615,26458,1381.3,sensenova-6.8-flash-lite,sensenova,put the black bowl in the top drawer of the cabinet
+p1_pilot,libero_90_20,libero_90,max_turns,,33,100,1827469,48780,3378.9,sensenova-6.8-flash-lite,sensenova,turn on the stove
+p1_pilot,libero_90_21,libero_90,task_failed,,10,66,1255418,27552,3148.2,sensenova-6.8-flash-lite,sensenova,turn on the stove and put the frying pan on it
+p1_pilot,libero_90_22,libero_90,task_failed,,7,63,1164372,27545,2468.6,sensenova-6.8-flash-lite,sensenova,close the bottom drawer of the cabinet
+p1_pilot,libero_90_23,libero_90,max_turns,,10,100,1913119,57085,2699.1,sensenova-6.8-flash-lite,sensenova,close the bottom drawer of the cabinet and open the top drawer
+p1_pilot,libero_90_24,libero_90,task_failed,,10,53,792356,17866,1327.8,sensenova-6.8-flash-lite,sensenova,put the black bowl in the bottom drawer of the cabinet
+p1_pilot,libero_90_25,libero_90,max_turns,,4,100,1745728,60659,3028.2,sensenova-6.8-flash-lite,sensenova,put the black bowl on top of the cabinet
+p1_pilot,libero_90_26,libero_90,success_verified,R5_counter_tamper,1,76,1438073,35377,2285.8,sensenova-6.8-flash-lite,sensenova,put the wine bottle in the bottom drawer of the cabinet
+p1_pilot,libero_90_27,libero_90,task_failed,,10,54,948399,28043,2449.5,sensenova-6.8-flash-lite,sensenova,put the wine bottle on the wine rack
+p1_pilot,libero_90_28,libero_90,success_verified,R5_counter_tamper,1,66,1106343,14890,1758.4,sensenova-6.8-flash-lite,sensenova,close the top drawer of the cabinet
+p1_pilot,libero_90_29,libero_90,task_failed,,10,99,1701273,36794,2638.4,sensenova-6.8-flash-lite,sensenova,put the black bowl in the top drawer of the cabinet
+p1_pilot,libero_90_3,libero_90,task_failed,,10,95,1857352,32448,2368.4,sensenova-6.8-flash-lite,sensenova,put the butter at the back in the top drawer of the cabinet and close it
+p1_pilot,libero_90_30,libero_90,task_failed,,10,42,724196,21700,1624.7,sensenova-6.8-flash-lite,sensenova,put the black bowl on the plate
+p1_pilot,libero_90_31,libero_90,max_turns,,10,100,1867706,44108,3288.4,sensenova-6.8-flash-lite,sensenova,put the black bowl on top of the cabinet
+p1_pilot,libero_90_32,libero_90,task_failed,,10,77,1423471,32149,2746.2,sensenova-6.8-flash-lite,sensenova,put the ketchup in the top drawer of the cabinet
+p1_pilot,libero_90_33,libero_90,max_turns,,10,100,1872072,69547,3372.1,sensenova-6.8-flash-lite,sensenova,close the microwave
+p1_pilot,libero_90_34,libero_90,task_failed,,10,22,346420,12588,1175.7,sensenova-6.8-flash-lite,sensenova,put the yellow and white mug to the front of the white mug
+p1_pilot,libero_90_35,libero_90,max_turns,,0,100,1817652,54083,2944.6,sensenova-6.8-flash-lite,sensenova,open the microwave
+p1_pilot,libero_90_36,libero_90,success_verified,,5,23,309915,10252,564.8,sensenova-6.8-flash-lite,sensenova,put the white bowl on the plate
+p1_pilot,libero_90_37,libero_90,task_failed,,10,46,783192,23093,1309.1,sensenova-6.8-flash-lite,sensenova,put the white bowl to the right of the plate
+p1_pilot,libero_90_38,libero_90,task_failed,,10,30,450957,10154,1054.1,sensenova-6.8-flash-lite,sensenova,put the right moka pot on the stove
+p1_pilot,libero_90_39,libero_90,task_failed,,10,48,883311,24105,1940.4,sensenova-6.8-flash-lite,sensenova,turn off the stove
+p1_pilot,libero_90_4,libero_90,task_failed,,10,69,1186148,30287,1880.9,sensenova-6.8-flash-lite,sensenova,put the butter at the front in the top drawer of the cabinet and close it
+p1_pilot,libero_90_40,libero_90,task_failed,,6,36,479314,12573,960.5,sensenova-6.8-flash-lite,sensenova,put the frying pan on the cabinet shelf
+p1_pilot,libero_90_41,libero_90,infra_env,,10,30,500739,24010,1356.5,sensenova-6.8-flash-lite,sensenova,put the frying pan on top of the cabinet
+p1_pilot,libero_90_42,libero_90,task_failed,,10,42,626934,8878,1077.2,agnes-3.0-flash,agnes,put the frying pan under the cabinet shelf
+p1_pilot,libero_90_43,libero_90,task_failed,,10,57,1053922,35746,1455.7,sensenova-6.8-flash-lite,sensenova,put the white bowl on top of the cabinet
+p1_pilot,libero_90_44,libero_90,max_turns,,10,100,1954626,34409,3150.6,sensenova-6.8-flash-lite,sensenova,turn on the stove
+p1_pilot,libero_90_45,libero_90,task_failed,,10,100,1811654,52069,3738.0,sensenova-6.8-flash-lite,sensenova,turn on the stove and put the frying pan on it
+p1_pilot,libero_90_46,libero_90,success_verified,,6,29,419866,8259,1009.6,sensenova-6.8-flash-lite,sensenova,pick up the alphabet soup and put it in the basket
+p1_pilot,libero_90_47,libero_90,task_failed,,10,100,1646136,77317,3240.7,sensenova-6.8-flash-lite,sensenova,pick up the cream cheese box and put it in the basket
+p1_pilot,libero_90_48,libero_90,success_verified,,8,50,760686,35317,1225.9,sensenova-6.8-flash-lite,sensenova,pick up the ketchup and put it in the basket
+p1_pilot,libero_90_49,libero_90,success_verified,,2,12,109789,3179,495.9,sensenova-6.8-flash-lite,sensenova,pick up the tomato sauce and put it in the basket
+p1_pilot,libero_90_5,libero_90,task_failed,,10,33,554174,18181,1200.0,sensenova-6.8-flash-lite,sensenova,put the chocolate pudding in the top drawer of the cabinet and close it
+p1_pilot,libero_90_50,libero_90,task_failed,,10,58,1029974,24271,1817.7,sensenova-6.8-flash-lite,sensenova,pick up the alphabet soup and put it in the basket
+p1_pilot,libero_90_51,libero_90,success_verified,,2,10,92946,2427,240.7,sensenova-6.8-flash-lite,sensenova,pick up the butter and put it in the basket
+p1_pilot,libero_90_52,libero_90,success_verified,,6,30,428085,11188,1052.1,sensenova-6.8-flash-lite,sensenova,pick up the milk and put it in the basket
+p1_pilot,libero_90_53,libero_90,success_verified,,6,19,221498,8655,392.9,sensenova-6.8-flash-lite,sensenova,pick up the orange juice and put it in the basket
+p1_pilot,libero_90_54,libero_90,success_verified,R5_counter_tamper,2,50,921799,35113,2287.4,sensenova-6.8-flash-lite,sensenova,pick up the tomato sauce and put it in the basket
+p1_pilot,libero_90_55,libero_90,task_failed,,10,97,1831980,57681,2748.2,sensenova-6.8-flash-lite,sensenova,pick up the alphabet soup and put it in the tray
+p1_pilot,libero_90_56,libero_90,success_verified,,6,20,232827,6612,410.5,sensenova-6.8-flash-lite,sensenova,pick up the butter and put it in the tray
+p1_pilot,libero_90_57,libero_90,success_verified,,5,22,275174,5855,346.1,sensenova-6.8-flash-lite,sensenova,pick up the cream cheese and put it in the tray
+p1_pilot,libero_90_58,libero_90,success_verified,,6,31,441751,16772,827.4,sensenova-6.8-flash-lite,sensenova,pick up the ketchup and put it in the tray
+p1_pilot,libero_90_59,libero_90,success_verified,,5,18,220714,5755,355.7,sensenova-6.8-flash-lite,sensenova,pick up the tomato sauce and put it in the tray
+p1_pilot,libero_90_6,libero_90,task_failed,,10,81,1488312,28036,1841.3,sensenova-6.8-flash-lite,sensenova,open the bottom drawer of the cabinet
+p1_pilot,libero_90_60,libero_90,task_failed,,1,100,1776299,48094,3324.1,sensenova-6.8-flash-lite,sensenova,pick up the black bowl on the left and put it in the tray
+p1_pilot,libero_90_61,libero_90,task_failed,,10,100,1928059,54446,2487.4,sensenova-6.8-flash-lite,sensenova,pick up the chocolate pudding and put it in the tray
+p1_pilot,libero_90_62,libero_90,max_turns,,1,100,1787052,70887,3660.4,sensenova-6.8-flash-lite,sensenova,pick up the salad dressing and put it in the tray
+p1_pilot,libero_90_63,libero_90,task_failed,,10,95,1736230,74022,3110.6,sensenova-6.8-flash-lite,sensenova,stack the left bowl on the right bowl and place them in the tray
+p1_pilot,libero_90_64,libero_90,max_turns,,10,100,1842002,50288,3260.5,sensenova-6.8-flash-lite,sensenova,stack the right bowl on the left bowl and place them in the tray
+p1_pilot,libero_90_65,libero_90,success_verified,,4,16,278482,6995,531.1,sensenova-6.8-flash-lite,sensenova,put the red mug on the left plate
+p1_pilot,libero_90_66,libero_90,task_failed,,10,36,573889,15046,876.3,sensenova-6.8-flash-lite,sensenova,put the red mug on the right plate
+p1_pilot,libero_90_67,libero_90,task_failed,,10,66,1152663,26118,1593.9,sensenova-6.8-flash-lite,sensenova,put the white mug on the left plate
+p1_pilot,libero_90_68,libero_90,success_verified,,8,41,632295,16640,920.9,sensenova-6.8-flash-lite,sensenova,put the yellow and white mug on the right plate
+p1_pilot,libero_90_69,libero_90,task_failed,,10,37,565977,30782,928.7,sensenova-6.8-flash-lite,sensenova,put the chocolate pudding to the left of the plate
+p1_pilot,libero_90_7,libero_90,task_failed,,7,63,1085246,35753,1540.3,sensenova-6.8-flash-lite,sensenova,open the top drawer of the cabinet
+p1_pilot,libero_90_70,libero_90,task_failed,,10,47,788142,28094,1334.4,sensenova-6.8-flash-lite,sensenova,put the chocolate pudding to the right of the plate
+p1_pilot,libero_90_71,libero_90,success_verified,,9,64,1061912,44405,1537.0,sensenova-6.8-flash-lite,sensenova,put the red mug on the plate
+p1_pilot,libero_90_72,libero_90,task_failed,,6,26,368265,12248,474.2,sensenova-6.8-flash-lite,sensenova,put the white mug on the plate
+p1_pilot,libero_90_73,libero_90,task_failed,,10,80,1505764,29188,2187.3,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the front compartment of the caddy
+p1_pilot,libero_90_74,libero_90,task_failed,,10,75,1332476,27635,1850.9,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the left compartment of the caddy
+p1_pilot,libero_90_75,libero_90,task_failed,,10,73,1300452,41098,1920.3,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the right compartment of the caddy
+p1_pilot,libero_90_76,libero_90,task_failed,,10,100,1785957,46419,2424.8,sensenova-6.8-flash-lite,sensenova,pick up the yellow and white mug and place it to the right of the caddy
+p1_pilot,libero_90_77,libero_90,task_failed,,6,100,1956410,26092,2303.8,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the back compartment of the caddy
+p1_pilot,libero_90_78,libero_90,task_failed,,10,52,794411,23948,1270.7,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the front compartment of the caddy
+p1_pilot,libero_90_79,libero_90,max_turns,,10,100,1838709,39535,2396.8,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the left compartment of the caddy
+p1_pilot,libero_90_8,libero_90,task_failed,,10,51,777810,19113,1297.5,sensenova-6.8-flash-lite,sensenova,open the top drawer of the cabinet and put the bowl in it
+p1_pilot,libero_90_80,libero_90,task_failed,,10,89,1488609,50047,1990.1,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the right compartment of the caddy
+p1_pilot,libero_90_81,libero_90,task_failed,,10,98,1710621,74947,2836.3,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the front compartment of the caddy
+p1_pilot,libero_90_82,libero_90,task_failed,,10,60,1109922,33530,1852.5,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the left compartment of the caddy
+p1_pilot,libero_90_83,libero_90,max_turns,,10,100,1835364,57915,2937.0,sensenova-6.8-flash-lite,sensenova,pick up the book and place it in the right compartment of the caddy
+p1_pilot,libero_90_84,libero_90,task_failed,,10,38,626020,23009,1356.0,sensenova-6.8-flash-lite,sensenova,pick up the red mug and place it to the right of the caddy
+p1_pilot,libero_90_85,libero_90,task_failed,,10,73,1290147,28384,1583.7,sensenova-6.8-flash-lite,sensenova,pick up the white mug and place it to the right of the caddy
+p1_pilot,libero_90_86,libero_90,max_turns,,1,100,1713914,47789,2073.6,sensenova-6.8-flash-lite,sensenova,pick up the book in the middle and place it on the cabinet shelf
+p1_pilot,libero_90_87,libero_90,max_turns,,8,100,1801124,30891,1792.5,sensenova-6.8-flash-lite,sensenova,pick up the book on the left and place it on top of the shelf
+p1_pilot,libero_90_88,libero_90,task_failed,,10,52,962451,28765,1432.8,sensenova-6.8-flash-lite,sensenova,pick up the book on the right and place it on the cabinet shelf
+p1_pilot,libero_90_89,libero_90,task_failed,,3,87,1646577,40707,1490.7,sensenova-6.8-flash-lite,sensenova,pick up the book on the right and place it under the cabinet shelf
+p1_pilot,libero_90_9,libero_90,max_turns,,1,100,1882684,49416,3205.7,sensenova-6.8-flash-lite,sensenova,put the black bowl on the plate
+p1_pilot,libero_goal_0,libero_goal,task_failed,,10,86,1651376,37599,2588.4,sensenova-6.8-flash-lite,sensenova,open the middle drawer of the cabinet
+p1_pilot,libero_goal_1,libero_goal,task_failed,,9,61,1093419,29918,2738.9,sensenova-6.8-flash-lite,sensenova,put the bowl on the stove
+p1_pilot,libero_goal_2,libero_goal,task_failed,,10,58,941384,22697,1164.7,sensenova-6.8-flash-lite,sensenova,put the wine bottle on top of the cabinet
+p1_pilot,libero_goal_3,libero_goal,user_rejected,,1,17,165421,1852,148.1,sensenova-6.8-flash-lite,sensenova,open the top drawer and put the bowl inside
+p1_pilot,libero_goal_4,libero_goal,task_failed,,5,29,423022,11298,548.6,sensenova-6.8-flash-lite,sensenova,put the bowl on top of the cabinet
+p1_pilot,libero_goal_5,libero_goal,max_turns,,38,100,1791287,69705,3393.3,sensenova-6.8-flash-lite,sensenova,push the plate to the front of the stove
+p1_pilot,libero_goal_6,libero_goal,task_failed,,10,46,817518,30101,2000.4,sensenova-6.8-flash-lite,sensenova,put the cream cheese in the bowl
+p1_pilot,libero_goal_7,libero_goal,max_turns,,2,100,1806549,19585,1563.6,sensenova-6.8-flash-lite,sensenova,turn on the stove
+p1_pilot,libero_goal_8,libero_goal,task_failed,,10,50,851831,37726,1657.9,sensenova-6.8-flash-lite,sensenova,put the bowl on the plate
+p1_pilot,libero_goal_9,libero_goal,task_failed,,10,23,355283,18321,1047.5,sensenova-6.8-flash-lite,sensenova,put the wine bottle on the rack
+p1_pilot,libero_object_0,libero_object,success_verified,,1,14,89119,1610,178.6,sensenova-6.8-flash-lite,sensenova,pick up the alphabet soup and place it in the basket
+p1_pilot,libero_object_1,libero_object,task_failed,,1,43,738364,15062,1690.9,sensenova-6.8-flash-lite,sensenova,pick up the cream cheese and place it in the basket
+p1_pilot,libero_object_2,libero_object,success_verified,,1,11,106603,2264,251.7,sensenova-6.8-flash-lite,sensenova,pick up the salad dressing and place it in the basket
+p1_pilot,libero_object_3,libero_object,success_verified,,5,19,223664,5665,407.8,sensenova-6.8-flash-lite,sensenova,pick up the bbq sauce and place it in the basket
+p1_pilot,libero_object_4,libero_object,task_failed,,10,48,877475,27489,1171.4,sensenova-6.8-flash-lite,sensenova,pick up the ketchup and place it in the basket
+p1_pilot,libero_object_5,libero_object,success_verified,,3,14,123641,2440,224.6,sensenova-6.8-flash-lite,sensenova,pick up the tomato sauce and place it in the basket
+p1_pilot,libero_object_6,libero_object,task_failed,,10,39,718651,14938,1200.8,sensenova-6.8-flash-lite,sensenova,pick up the butter and place it in the basket
+p1_pilot,libero_object_7,libero_object,success_verified,,5,19,251011,8688,437.1,sensenova-6.8-flash-lite,sensenova,pick up the milk and place it in the basket
+p1_pilot,libero_object_8,libero_object,task_failed,,10,35,611893,14553,1255.3,sensenova-6.8-flash-lite,sensenova,pick up the chocolate pudding and place it in the basket
+p1_pilot,libero_object_9,libero_object,success_verified,,2,12,108239,2491,182.5,sensenova-6.8-flash-lite,sensenova,pick up the orange juice and place it in the basket
+p1_pilot,libero_spatial_0,libero_spatial,task_failed,,1,42,727613,7730,911.5,agnes-3.0-flash,agnes,pick up the black bowl between the plate and the ramekin and place it on the plate
+p1_pilot,libero_spatial_1,libero_spatial,task_failed,,11,53,942447,16834,870.8,agnes-3.0-flash,agnes,pick up the black bowl next to the ramekin and place it on the plate
+p1_pilot,libero_spatial_2,libero_spatial,task_failed,,1,20,280372,6060,656.0,sensenova-6.8-flash-lite,sensenova,pick up the black bowl from table center and place it on the plate
+p1_pilot,libero_spatial_3,libero_spatial,success_verified,,10,65,1085388,18941,915.0,agnes-3.0-flash,agnes,pick up the black bowl on the cookie box and place it on the plate
+p1_pilot,libero_spatial_4,libero_spatial,task_failed,,10,36,608482,16923,1359.6,sensenova-6.8-flash-lite,sensenova,pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate
+p1_pilot,libero_spatial_5,libero_spatial,task_failed,,4,19,191314,5556,460.2,sensenova-6.8-flash-lite,sensenova,pick up the black bowl on the ramekin and place it on the plate
+p1_pilot,libero_spatial_6,libero_spatial,task_failed,,10,32,484897,19299,1293.2,sensenova-6.8-flash-lite,sensenova,pick up the black bowl next to the cookie box and place it on the plate
+p1_pilot,libero_spatial_7,libero_spatial,task_failed,,3,24,210117,4330,658.5,sensenova-6.8-flash-lite,sensenova,pick up the black bowl on the stove and place it on the plate
+p1_pilot,libero_spatial_8,libero_spatial,task_failed,,10,100,1739898,55516,3305.3,sensenova-6.8-flash-lite,sensenova,pick up the black bowl next to the plate and place it on the plate
+p1_pilot,libero_spatial_9,libero_spatial,success_verified,,9,31,493508,15301,964.6,sensenova-6.8-flash-lite,sensenova,pick up the black bowl on the wooden cabinet and place it on the plate

@@ -1,0 +1,39 @@
+{
+ "stage": "p0_prompt_dev",
+ "suite": "libero_object",
+ "task_id": "libero_object_0",
+ "language": "pick up the alphabet soup and place it in the basket",
+ "model": "sensenova-6.8-flash-lite",
+ "provider": "sensenova",
+ "mcc_exit_code": 0,
+ "outcome": "success_verified",
+ "flagged": [],
+ "verified": {
+  "rerun_success": true,
+  "meta": {
+   "success": true,
+   "num_tries": 1,
+   "final_try": 1
+  }
+ },
+ "video_source": "final_try",
+ "detail": {
+  "meta": {
+   "success": true,
+   "num_tries": 1,
+   "final_try": 1
+  }
+ },
+ "wall_time_s": 776.0,
+ "turns": 21,
+ "tokens_in": 214665,
+ "tokens_out": 4121,
+ "tool_calls": {
+  "bash": 13,
+  "read_file": 5,
+  "write_file": 1,
+  "edit_file": 4
+ },
+ "tries": 1,
+ "ts": "2026-10-16 18:09:25"
+}

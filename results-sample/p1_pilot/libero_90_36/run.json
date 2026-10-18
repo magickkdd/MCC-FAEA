@@ -1,0 +1,39 @@
+{
+ "stage": "p1_pilot",
+ "suite": "libero_90",
+ "task_id": "libero_90_36",
+ "language": "put the white bowl on the plate",
+ "model": "sensenova-6.8-flash-lite",
+ "provider": "sensenova",
+ "mcc_exit_code": 0,
+ "outcome": "success_verified",
+ "flagged": [],
+ "verified": {
+  "rerun_success": true,
+  "meta": {
+   "success": true,
+   "num_tries": 1,
+   "final_try": 1
+  }
+ },
+ "video_source": "latest",
+ "detail": {
+  "meta": {
+   "success": true,
+   "num_tries": 1,
+   "final_try": 1
+  }
+ },
+ "wall_time_s": 564.8,
+ "turns": 23,
+ "tokens_in": 309915,
+ "tokens_out": 10252,
+ "tool_calls": {
+  "bash": 15,
+  "read_file": 3,
+  "write_todos": 3,
+  "write_file": 4
+ },
+ "tries": 5,
+ "ts": "2026-10-17 18:32:27"
+}

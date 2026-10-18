@@ -1,0 +1,33 @@
+{
+ "stage": "p1_pilot",
+ "suite": "libero_goal",
+ "task_id": "libero_goal_0",
+ "language": "open the middle drawer of the cabinet",
+ "model": "sensenova-6.8-flash-lite",
+ "provider": "sensenova",
+ "mcc_exit_code": 0,
+ "outcome": "task_failed",
+ "flagged": [],
+ "verified": null,
+ "video_source": "latest",
+ "detail": {
+  "meta": {
+   "success": false,
+   "num_tries": 4,
+   "final_try": 4,
+   "note": "Env reached 2 successful-reset cap across the session; the pull-toward -x episode was written but could not be executed to produce a live success flag. Analysis: cabinet middle drawer is a hinge (axis +y, range [-0.16, 0.01], handle offset +z above pivot). Negative rotation around +y maps +z to -x, so the correct action is to pull the handle toward -x — the earlier +y/-y pushes never moved the hinge."
+  }
+ },
+ "wall_time_s": 2588.4,
+ "turns": 86,
+ "tokens_in": 1651376,
+ "tokens_out": 37599,
+ "tool_calls": {
+  "bash": 56,
+  "read_file": 4,
+  "write_file": 21,
+  "search_text": 2
+ },
+ "tries": 10,
+ "ts": "2026-10-16 21:54:45"
+}

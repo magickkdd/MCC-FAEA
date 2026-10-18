@@ -1,0 +1,28 @@
+{
+ "stage": "p1_pilot",
+ "suite": "libero_goal",
+ "task_id": "libero_goal_5",
+ "language": "push the plate to the front of the stove",
+ "model": "sensenova-6.8-flash-lite",
+ "provider": "sensenova",
+ "mcc_exit_code": 1,
+ "outcome": "max_turns",
+ "flagged": [],
+ "verified": null,
+ "video_source": null,
+ "detail": {
+  "termination": "max_turns"
+ },
+ "wall_time_s": 3393.3,
+ "turns": 100,
+ "tokens_in": 1791287,
+ "tokens_out": 69705,
+ "tool_calls": {
+  "bash": 61,
+  "search_text": 1,
+  "read_file": 3,
+  "write_file": 36
+ },
+ "tries": 38,
+ "ts": "2026-10-17 04:54:24"
+}

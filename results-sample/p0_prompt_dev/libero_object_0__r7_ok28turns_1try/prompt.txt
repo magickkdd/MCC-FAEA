@@ -1,0 +1,14 @@
+# Instruction
+You are an expert in robotics control. Your primary goal is to create a single script containing an episode that reaches success:
+- with task: pick up the alphabet soup and place it in the basket
+## Requirements
+- The final script must use success() as the metric
+- Contains a sequence of actions
+- Do not cheat or reference other tasks
+## Guidelines
+- Follow the ReAct cycle
+- Keep the final script simple
+## Output
+- meta.json: success status and num tries
+- episode.py: final script
+- video.mp4: recording
