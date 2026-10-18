@@ -65,18 +65,48 @@ source — which one session even read back to audit itself).
 
 *(mp4: [results-sample/p1_pilot/libero_90_36/video.mp4](results-sample/p1_pilot/libero_90_36/video.mp4))*
 
-- **Received:** a long-horizon cabinet task + the same contract files.
-- **How it went:** textbook agentic loop. Turns 1–4 recon (README, example,
-  API doc, trial counter); turn 5–7 one-liner probes read ground-truth object
-  poses via `get_obs()`; turns 6–8 planned with `write_todos`; turn 9 wrote
-  `episode.py` v1 — failed; turns 11–15 wrote a separate `debug.py` probe to
-  isolate the failing phase, revised, still short; turn 16 re-planned the
-  todo list; turn 18 rewrote the episode with the fix; turn 20 ran to
-  success; turns 21–22 verified artifacts and deleted `debug.py` to leave a
-  clean final script.
-- **Components fired:** `write_todos` planner (3 updates), hypothesis-driven
-  self-debug loop (write probe → run → read → revise), tool cleanup
-  discipline. No compaction needed at 23 turns.
+**What MCC received** — the exact package, identical shape for every task:
+
+- One task line inside `prompt.txt`: *"put the white bowl on the plate"*
+  (`libero_90_36`, LIBERO-90/Long suite). That is all the task information —
+  no object poses, no scene description, no demonstrations.
+- `README.md` (2.1 KB) — workspace contract: what to produce, where the
+  trial counter lives, how success is judged.
+- `docs/api.md` (6.3 KB) — the `LiberoEnv` interface: 7-dim action
+  `[x, y, z, axis-angle×3, gripper]` with `+1`=open / `-1`=close, absolute
+  Cartesian targets, `get_obs()` schema (incl. per-object ground-truth
+  poses), `check_success()`.
+- `example_episode.py` (3 KB) — the frozen task-0 solution, shipped as a
+  *skeleton to adapt*, not an answer to this task.
+- Output contract: `meta.json` + `episode.py` + `video.mp4`.
+- Session config: `sensenova-6.8-flash-lite`, MAX_TURNS=100, 6M token
+  budget, ~4.2K-token system prompt; tools: `bash`, `read_file`,
+  `write_file`, `edit_file`, `write_todos`, `find_files`, `search_text`,
+  `run_tests`.
+
+**How it went, turn by turn** (25 tool calls, all 25 permission checks allowed):
+
+| Turns | What happened |
+|---|---|
+| 1–4 | Recon: `ls workspace/`; read `README.md`, `example_episode.py`, `docs/api.md`; checked the trial counter `.sim_state.json`; confirmed the task id exists via `list_tasks()` |
+| 5–7 | One-liner probes through `LiberoEnv`: opened the env once and read ground-truth poses of `white_bowl_1_main` and `plate_1_main` straight out of `get_obs()` |
+| 6, 8 | `write_todos` ×2: *probe environment → write episode.py with pick-up-and-place strategy → run and iterate until success* |
+| 9–10 | Wrote `episode.py` v1 (top-down grasp → lift → translate → lower → release) and ran it — `success: False` |
+| 11 | Re-ran a tweaked variant inline — tool call errored on a typo'd interpreter path (`minif forge3`), no information gained |
+| 12–15 | Wrote a separate `debug.py` probe that executes **only** the grasp→lift→place pipeline phase by phase, printing the object pose after each step; ran it, revised it, ran again — isolated the phase that lost the bowl |
+| 16–17 | `write_todos` ×3 (writing done, iterate in progress); checked `.sim_state.json` to budget remaining tries before spending one |
+| 18–20 | Rewrote `episode.py` v2 with the fix — the final script re-reads the bowl's true pose **after** the gripper closes (a grasp can drag the object) before planning the lift, and lets the scene settle 10 steps before reading poses; ran to success |
+| 21–23 | Verified artifacts (`ls`, `cat meta.json` → `{"success": true, "num_tries": 1}`), deleted `debug.py` to leave a clean workspace, reported |
+
+**Numbers:** 23 turns; 5 simulator tries; 9.4 min wall time; 309.9K tokens
+in / 10.3K out; tool mix bash×15, read_file×3, write_file×4, write_todos×3.
+
+**Components fired:** the `write_todos` planner (3 updates tracking
+probe → write → iterate), hypothesis-driven self-debug loop (write probe →
+run → read → revise — the same loop that becomes a 7-probe ladder in
+Spatial #3 below), trial-counter awareness (checked `.sim_state.json`
+before spending tries), and tool cleanup discipline. No context compaction
+needed at this depth.
 
 ### 3. LIBERO-Spatial #3 — trial-and-error success (65 turns, 6 tries)
 
