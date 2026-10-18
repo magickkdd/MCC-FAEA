@@ -12,28 +12,111 @@ MCC-FAEA is a demonstration-free robotic manipulation reproduction of **FAEA** (
 | LIBERO-Long (90) | 19.3% | 68.9% |
 | **Average** | **20.8%** | **70.6%** |
 
-## 🎬 Demo videos
+## 🎬 Demo videos — what MCC received, what it did, and which components fired
 
-Recorded at 256×256 / 20 fps inside the simulation. Left column: successful
-episodes discovered by the agent; right: an honest failure (10-trial budget
-burned). The agent wrote all control code itself — `episode.py` issues absolute
-end-effector pose targets through the documented wrapper API.
+Recorded at 256×256 / 20 fps inside the simulation. All control code below was
+written by MCC itself — `episode.py` issues absolute end-effector pose targets
+through the documented wrapper API.
 
-**LIBERO-Object task 0 — success in a single try** (14 ReAct turns, few-shot example injected):
+**What every session receives.** One FAEA prompt (paper Fig.1 template + the
+official LIBERO task description + a frozen task-0 success script as few-shot)
+passed via `--task`, plus a sandbox workspace: `README.md` (task assignment,
+the fixed libero-interpreter path, required outputs), `docs/api.md` (the full
+wrapper contract), and `.sim_state.json` (trial counter, optionally capped).
+MCC then wraps this into a per-turn system message: environment facts + an AST
+repo map of the workspace + the 9-tool spec + planning/self-debugging norms +
+the live TodoList. Every turn is one ReAct cycle: model proposes tool calls →
+permission gate (path lock, destructive-command denial) → tools execute → all
+results return packed as a single user message.
+
+**The MCC components doing the work below:** `agent/loop.py` (Ask→Act→Observe
+cycle with per-turn stop-losses: MAX_TURNS, cumulative token budget, 3-strike
+stall detector), `write_todos` (plan checklist replayed into every system
+message), `bash`/`write_file`/`edit_file`/`read_file` (66%/23%/6% of all 7,611
+tool calls), the **context-compaction ladder** (auto-summarizes history when
+the estimated context crosses TOKEN_BUDGET — what keeps 65–86-turn sessions
+alive on a 256K-context flash model), and the JSONL **trace** (our metrics
+source — which one session even read back to audit itself).
+
+---
+
+### 1. LIBERO-Object task 0 — success in a single try (14 turns, 1 try)
 
 ![object_0 success](results-sample/p1_pilot/libero_object_0/video.mp4)
 
-**LIBERO-Long #36 — fastest long-horizon success** (23 turns, 5 tries, 9.4 min):
+- **Received:** "pick up the alphabet soup and place it in the basket" + a
+  few-shot example that happens to BE the solution to this exact task (the
+  frozen task-0 script from prompt development).
+- **How it went:** turns 1–3 listed the workspace, read the example, and
+  copied it straight to `episode.py` — then hit the session's only real
+  obstacle: bare `python3` has no sim package. Turns 4–7 located the correct
+  conda interpreter (`envs/libero/bin/python`) and validated the wrapper
+  import; turns 8–11 re-read the contract and confirmed the trial counter;
+  turn 12 ran the episode to success; turn 13 self-audited `meta.json` and
+  the recorded video before finishing.
+- **Components fired:** read-before-act discipline (`read_file`), permission
+  gate 13× (all allowed), no compaction, no todos needed — the cheap path.
+
+### 2. LIBERO-Long #36 — fastest long-horizon success (23 turns, 5 tries, 9.4 min)
 
 ![90_36 success](results-sample/p1_pilot/libero_90_36/video.mp4)
 
-**LIBERO-Spatial #3 — trial-and-error success** (the only Spatial pass):
+- **Received:** a long-horizon cabinet task + the same contract files.
+- **How it went:** textbook agentic loop. Turns 1–4 recon (README, example,
+  API doc, trial counter); turn 5–7 one-liner probes read ground-truth object
+  poses via `get_obs()`; turns 6–8 planned with `write_todos`; turn 9 wrote
+  `episode.py` v1 — failed; turns 11–15 wrote a separate `debug.py` probe to
+  isolate the failing phase, revised, still short; turn 16 re-planned the
+  todo list; turn 18 rewrote the episode with the fix; turn 20 ran to
+  success; turns 21–22 verified artifacts and deleted `debug.py` to leave a
+  clean final script.
+- **Components fired:** `write_todos` planner (3 updates), hypothesis-driven
+  self-debug loop (write probe → run → read → revise), tool cleanup
+  discipline. No compaction needed at 23 turns.
+
+### 3. LIBERO-Spatial #3 — trial-and-error success (65 turns, 6 tries)
 
 ![spatial_3 success](results-sample/p1_pilot/libero_spatial_3/video.mp4)
 
-**LIBERO-Goal #0 — honest failure** (86 turns, 10-trial cap exhausted; the Goal suite stayed at 0%):
+- **Received:** a spatial-reasoning task where the target's location must be
+  inferred from scene layout — the suite where this model mostly fails.
+- **How it went:** the grind profile. Turns 1–4 recon; turns 7–25 the
+  **debug-ladder**: seven successive `debug1.py`…`debug7.py` probes, each
+  isolating one geometric hypothesis (grasp height, approach side, gripper
+  timing); turn 26 folded the winning configuration into `episode.py`; turns
+  27–35 ran repeated tries, hitting trial-cap pressure; turns 36–55 then did
+  something remarkable — the agent **read its own `trace.jsonl` and per-try
+  videos to audit which attempt had gotten closest**, cross-checking
+  `sim_state.json` counts; turns 49/57–63 re-read the contract and episode,
+  edited, and locked in the verified success.
+- **Components fired:** the **context-compaction ladder fired 17×** (this
+  session could not have fit a 256K window otherwise); stall detector stayed
+  quiet because each probe differed; `edit_file` surgical fix at turn 49.
+
+### 4. LIBERO-Goal #0 — honest failure (86 turns, 10-try cap exhausted)
 
 ![goal_0 failure](results-sample/p1_pilot/libero_goal_0/video.mp4)
+
+- **Received:** "open the middle drawer of the cabinet" — an articulated-
+  object task. The wrapper exposes no handle joint in `get_obs()`, and the
+  model never recovered from that gap.
+- **How it went:** research-spiral profile. Turns 4–13 probed the scene and
+  wrote `explore.py`; turns 14–23 went deep into LIBERO internals via `bash`
+  — reading the task's BDDL definition and the wooden-cabinet MJCF asset to
+  find the handle site; turns 24–27, 45, 57, 63, 79–80 even grepped the
+  machine for **an unrelated prior robot project's logs** on this exact task
+  (found on disk, mined for hints); turns 28–77 cycled through eleven
+  `explore.py` rewrites trying to approximate a drawer-grasp blind; turn 78
+  finally wrote `episode.py` — too late to do more than burn the remaining
+  tries; turn 85 wrote `meta.json` reporting failure honestly, and turn 84
+  had already cleaned up its probe files.
+- **Components fired:** **context-compaction ladder fired 24×** (86 turns on
+  a small window); `search_text` used once the agent noticed raw `grep` was
+  slow; the permission gate rejected nothing — the failure is purely
+  capability (articulated joint not in the privileged obs, not a model the
+  flash tier could probe its way around).
+
+---
 
 Curated evidence lives in [`results-sample/`](results-sample/README.md) (success/failure/cheating case studies with full traces and videos) and [`reports/`](reports/) (stage reports with paper-comparison tables).
 
