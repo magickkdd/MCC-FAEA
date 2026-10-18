@@ -108,14 +108,16 @@ Spatial #3 below), trial-counter awareness (checked `.sim_state.json`
 before spending tries), and tool cleanup discipline. No context compaction
 needed at this depth.
 
-### 3. LIBERO-Spatial #3 — trial-and-error success (65 turns, 6 tries)
+### 3. LIBERO-Spatial #3 — trial-and-error success (65 turns, 10/10 tries)
 
 ![spatial_3 success](results-sample/p1_pilot/libero_spatial_3/demo.gif)
 
 *(mp4: [results-sample/p1_pilot/libero_spatial_3/video.mp4](results-sample/p1_pilot/libero_spatial_3/video.mp4))*
 
-- **Received:** a spatial-reasoning task where the target's location must be
-  inferred from scene layout — the suite where this model mostly fails.
+- **Received:** "pick up the black bowl on the cookie box and place it on the
+  plate" — the bowl is **elevated on a cookie box**, so the example's
+  table-level grasp geometry does not transfer, and distractors surround the
+  scene. The suite where this model mostly fails.
 - **How it went:** the grind profile. Turns 1–4 recon; turns 7–25 the
   **debug-ladder**: seven successive `debug1.py`…`debug7.py` probes, each
   isolating one geometric hypothesis (grasp height, approach side, gripper
@@ -124,7 +126,10 @@ needed at this depth.
   something remarkable — the agent **read its own `trace.jsonl` and per-try
   videos to audit which attempt had gotten closest**, cross-checking
   `sim_state.json` counts; turns 49/57–63 re-read the contract and episode,
-  edited, and locked in the verified success.
+  edited, and locked in the verified success. Final twist: `meta.json` shows
+  `final_try: 10` against a trial cap of 10 — **it succeeded on the very
+  last permitted try**; giving up two turns earlier would have erased this
+  case.
 - **Components fired:** the **context-compaction ladder fired 17×** (this
   session could not have fit a 256K window otherwise); stall detector stayed
   quiet because each probe differed; `edit_file` surgical fix at turn 49.
@@ -143,11 +148,16 @@ needed at this depth.
   — reading the task's BDDL definition and the wooden-cabinet MJCF asset to
   find the handle site; turns 24–27, 45, 57, 63, 79–80 even grepped the
   machine for **an unrelated prior robot project's logs** on this exact task
-  (found on disk, mined for hints); turns 28–77 cycled through eleven
+  (found on disk, mined for hints); turns 28–77 cycled through fifteen-plus
   `explore.py` rewrites trying to approximate a drawer-grasp blind; turn 78
   finally wrote `episode.py` — too late to do more than burn the remaining
   tries; turn 85 wrote `meta.json` reporting failure honestly, and turn 84
-  had already cleaned up its probe files.
+  had already cleaned up its probe files. The post-mortem it left in
+  `meta.json` is the sting: **it had solved the kinematics** — "the drawer is
+  a hinge (axis +y, range [-0.16, 0.01], handle offset +z above pivot);
+  negative rotation around +y maps +z to -x, so the correct action is to
+  pull toward -x" — but the try budget was gone before it could demonstrate
+  the correct answer live.
 - **Components fired:** **context-compaction ladder fired 24×** (86 turns on
   a small window); `search_text` used once the agent noticed raw `grep` was
   slow; the permission gate rejected nothing — the failure is purely
