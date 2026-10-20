@@ -1,16 +1,33 @@
 # MCC-FAEA
 
-MCC-FAEA is a demonstration-free robotic manipulation reproduction of **FAEA** (Frontier Agent as Embodied Agent, arXiv:2601.20334) that replaces the paper's Claude Agent SDK + Opus 4.5 stack with **MiniClaudeCode (MCC)** — a self-built terminal coding agent — driving free-tier Chinese LLM endpoints (SenseNova `sensenova-6.8-flash-lite`, Agnes `agnes-3.0-flash`). Each LIBERO task is one independent MCC subprocess session: the agent reads provisioned API docs, writes an `episode.py` that drives a Franka Panda through absolute end-effector Cartesian control under privileged state observation, and iterates through a ReAct loop (write → execute → observe → refine) until the task's native success predicate fires or its trial budget is exhausted. Every "success" is independently re-verified by replaying `episode.py` in a clean sandbox, and every session trace is scanned for reward hacking (counter tampering, API bypass, grid search). On the full LIBERO-120 benchmark the pipeline reaches **20.8% pilot success (25/120)** against the paper's 70.6% — with the difficulty gradient across suites (Object 60% > Spatial 20% ≈ Long 19% > Goal 0%), the resource-vs-difficulty scaling, and even per-suite turn counts closely mirroring the paper, isolating model tier as the dominant gap while confirming that the agent-as-manipulator paradigm transfers across agent frameworks.
+MCC-FAEA is a demonstration-free robotic manipulation reproduction of **FAEA** (Frontier Agent as Embodied Agent, arXiv:2601.20334) that replaces the paper's Claude Agent SDK + Opus 4.5 stack with **MiniClaudeCode (MCC)** — a self-built terminal coding agent — driving free-tier Chinese LLM endpoints (SenseNova `sensenova-6.8-flash-lite`, Agnes `agnes-3.0-flash`). Each LIBERO task is one independent MCC subprocess session: the agent reads provisioned API docs, writes an `episode.py` that drives a Franka Panda through absolute end-effector Cartesian control under privileged state observation, and iterates through a ReAct loop (write → execute → observe → refine) until the task's native success predicate fires or its trial budget is exhausted. Every "success" is independently re-verified by replaying `episode.py` in a clean sandbox, and every session trace is scanned for reward hacking (counter tampering, API bypass, grid search). On the full LIBERO-120 benchmark the pipeline ran 215 sessions across the three-stage protocol (pilot → coaching retry), reaching **20.8% pilot success** against the paper's 70.6%, and a final adjudicated task-level outcome of **40/120 = 33.3%** after excluding 5 reward-hacking sessions — with the difficulty gradient across suites (Object 80% > Long 31% > Spatial 20% ≈ Goal 20%), the resource-vs-difficulty scaling, and even per-suite turn counts closely mirroring the paper, isolating model tier as the dominant gap while confirming that the agent-as-manipulator paradigm transfers across agent frameworks.
 
-## Results snapshot (Pilot, 10-trial cap, 120 tasks)
+## Results snapshot (full LIBERO-120, three-stage protocol, 215 sessions)
 
-| Suite | This repro | Paper (Opus 4.5) |
+**Stage comparison — per-session success rate under each condition:**
+
+| Condition | Spatial | Object | Goal | Long | Avg | Paper (Opus 4.5) |
+|---|---|---|---|---|---|---|
+| Pilot (10-trial cap) | 20.0% | 60.0% | 0.0% | 18.9% | 20.8% | 70.6% |
+| Coaching retry (95 pilot failures, uncapped) | 0.0% | 50.0% | 20.0% | 21.9% | 21.1% | 88.2% |
+
+**Final task-level outcome after reward-hacking adjudication — 40/120 = 33.3%:**
+
+| Suite | Final | Composition |
 |---|---|---|
-| LIBERO-Spatial (10) | 20.0% | 70.0% |
-| LIBERO-Object (10) | 60.0% | 100.0% |
-| LIBERO-Goal (10) | 0.0% | 60.0% |
-| LIBERO-Long (90) | 19.3% | 68.9% |
-| **Average** | **20.8%** | **70.6%** |
+| LIBERO-Spatial (10) | 2/10 = 20.0% | all from pilot |
+| LIBERO-Object (10) | 8/10 = 80.0% | 6 pilot + 2 coaching |
+| LIBERO-Goal (10) | 2/10 = 20.0% | all from coaching |
+| LIBERO-Long (90) | 28/90 = 31.1% | 14 pilot + 14 coaching |
+| **Average** | **33.3%** | paper +coaching: 88.2% |
+
+**Adjudication record** (7 flagged sessions, evidence in [reports/20261020-0357/ADJUDICATION.md](reports/20261020-0357/ADJUDICATION.md)):
+excluded 5 — `90_26/28/54` (pilot: forged the trial counter with `echo '{"try_count":0}'`),
+`90_33/39` (coaching: final scripts read raw MuJoCo state via `env._env.sim.data`, out of
+the documented obs contract), plus `object_8` (counter deletion + failed independent rerun).
+Kept 1 — `90_19` attempted the same counter deletion but the hardened off-sandbox counter
+was untouched (12/200 tries), and the success re-verified cleanly; kept as evidence that
+the anti-cheating sandbox actually held.
 
 ## 🎬 Demo videos — what MCC received, what it did, and which components fired
 
