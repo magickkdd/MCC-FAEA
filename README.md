@@ -297,3 +297,28 @@ All deviations from the paper's setup are registered in `SPEC.md` §5.7 (agent f
   year={2026}
 }
 ```
+
+## 🔭 Roadmap — improvement directions
+
+1. **Run the skipped baseline stage (M5) to separate tips from budget.** The coaching
+   stage bundles two changes — failure-targeted tips *and* a 200-try cap (vs pilot's 10).
+   Of the 18 adjudicated recoveries, 15 used >10 tries (budget-driven) and only 3
+   succeeded within the pilot budget (90_50 ×4, 90_55 ×3, 90_88 ×7 — tips-driven).
+   An uncapped no-tips baseline over the same 95 failures would decompose the two;
+   re-running the 25 pilot successes under coaching would also close the
+   condition-inequality blind spot (regression check).
+2. **Model-tier upgrade under the same protocol.** The dominant gap vs the paper is
+   attributed to the flash-tier models; one pilot run with a stronger model would turn
+   that attribution into evidence.
+3. **Extend the observation space for articulated objects.** Goal-suite failures trace
+   to `get_obs()` lacking joint state (goal_0 solved the kinematics blind but ran out
+   of budget). A wrapper-variant exposing joint state would quantify that gap — as a
+   registered deviation, keeping the paper baseline intact.
+4. **Component ablation for MCC.** Disable `write_todos` / the compaction ladder / the
+   repo map in controlled 10-task batches, upgrading "component contribution" from
+   correlation to causal evidence.
+5. **Compliant control for joint tasks.** Position servoing stalls against drawer
+   hinges; impedance control or gripper force feedback is the mechanical fix.
+6. **Multi-init-state robustness.** Sample several initial states per task instead of
+   the single deterministic reset, so "accidentally successful open-loop scripts" stop
+   being reproducible-by-luck.
