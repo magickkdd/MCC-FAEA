@@ -1,0 +1,7 @@
+stage,task_id,suite,outcome,flagged,tries,turns,tokens_in,tokens_out,wall_time_s,model,provider,language
+p4_v41_recovery,libero_goal_1,libero_goal,max_turns,,9,100,1935737,45153,1323.1,deepseek-v4.1-flash-1017,intern,put the bowl on the stove
+p4_v41_recovery,libero_object_1,libero_object,success_verified,,7,29,447820,24570,822.3,deepseek-v4.1-flash-1017,intern,pick up the cream cheese and place it in the basket
+p4_v41_recovery,libero_spatial_1,libero_spatial,llm_failure,,1,38,655525,20029,1710.5,deepseek-v4.1-flash-1017,intern,pick up the black bowl next to the ramekin and place it on the plate
+p4_v41_recovery,libero_spatial_2,libero_spatial,success_verified,,6,23,353523,16394,557.7,deepseek-v4.1-flash-1017,intern,pick up the black bowl from table center and place it on the plate
+p4_v41_recovery,libero_spatial_6,libero_spatial,task_failed,,1,15,183010,7560,401.1,deepseek-v4.1-flash-1017,intern,pick up the black bowl next to the cookie box and place it on the plate
+p4_v41_recovery,libero_spatial_8,libero_spatial,task_failed,,10,48,842898,31684,0,deepseek-v4.1-flash-1017,intern,pick up the black bowl at the front and place it on the plate

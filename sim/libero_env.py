@@ -268,6 +268,7 @@ class LiberoEnv:
         return {
             **eef,
             "objects": objects,
+            "articulated_joints": self._articulated_joints(model, data, mujoco),
             "task_info": {
                 "task_id": self.task_id,
                 "language": self.language,
@@ -276,6 +277,84 @@ class LiberoEnv:
                 "step_count": self._t,
             },
         }
+
+    @staticmethod
+    def _articulated_joints(model, data, mujoco) -> dict:
+        """铰接物体（抽屉/门/旋钮）的关节状态，供观测使用。
+
+        只包含非机器人 body 的 slide/hinge 关节。qpos 单位：
+        slide = 米，hinge = 弧度。handle_pos 优先取 handle 网格中心，
+        没有 handle 网格时退回该 body 所有几何体的中心。
+        """
+        out = {}
+        types = {
+            int(mujoco.mjtJoint.mjJNT_SLIDE): "slide",
+            int(mujoco.mjtJoint.mjJNT_HINGE): "hinge",
+        }
+        for j in range(model.njnt):
+            jtype = int(model.jnt_type[j])
+            if jtype not in types:
+                continue
+            bid = int(model.jnt_bodyid[j])
+            bname = model.body(bid).name
+            if bname.startswith(("robot0_", "gripper0_")):
+                continue
+            adr = int(model.jnt_qposadr[j])
+            lo, hi = (float(x) for x in model.jnt_range[j])
+            qpos = float(data.qpos[adr])
+            axis = np.asarray(data.xaxis[j], dtype=float)
+            anchor = np.asarray(data.xanchor[j], dtype=float)
+            body_pos = np.asarray(data.xpos[bid], dtype=float)
+            body_quat = np.asarray(data.xquat[bid], dtype=float)
+
+            geoms = [g for g in range(model.ngeom) if int(model.geom_bodyid[g]) == bid]
+            handle_pos = None
+            handle_mesh = None
+            for g in geoms:
+                if int(model.geom_type[g]) != int(mujoco.mjtGeom.mjGEOM_MESH):
+                    continue
+                try:
+                    mesh_name = model.mesh(int(model.geom_dataid[g])).name
+                except Exception:
+                    continue
+                if "handle" in (mesh_name or "").lower():
+                    handle_pos = np.asarray(data.geom_xpos[g], dtype=float)
+                    handle_mesh = mesh_name
+                    break
+            if handle_pos is None:
+                if geoms:
+                    handle_pos = np.asarray(
+                        [data.geom_xpos[g] for g in geoms], dtype=float
+                    ).mean(axis=0)
+                else:
+                    handle_pos = body_pos
+
+            rec = {
+                "body": bname,
+                "type": types[jtype],
+                "qpos": qpos,
+                "range": [lo, hi],
+                "travel": hi - lo,
+                "axis_world": axis.tolist(),
+                "anchor_pos": anchor.tolist(),
+                "body_pos": body_pos.tolist(),
+                "body_quat": body_quat.tolist(),
+                "handle_pos": handle_pos.tolist(),
+                "handle_mesh": handle_mesh,
+            }
+            if types[jtype] == "slide" and hi > lo:
+                closed = hi if abs(hi) < abs(lo) else lo
+                open_pos = hi if closed == lo else lo
+                rec["open_fraction"] = (qpos - closed) / (open_pos - closed)
+                rec["opening_direction"] = (
+                    axis * (1.0 if open_pos > closed else -1.0)
+                ).tolist()
+            else:
+                rel = handle_pos - anchor
+                radial = rel - axis * float(np.dot(rel, axis))
+                rec["handle_radius"] = float(np.linalg.norm(radial))
+            out[model.joint(j).name] = rec
+        return out
 
     def _read_state(self) -> dict:
         try:

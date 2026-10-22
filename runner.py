@@ -15,17 +15,62 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
+import random
 import re
 import shutil
+import signal
 import subprocess
 import sys
+import threading
 import time
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 RESULTS = ROOT / "results"
+
+_BUDGET_LOCK = threading.Lock()
+_BUDGET_LIMIT = 0
+_BUDGET_SPENT = 0
+_BUDGET_PATH: Path | None = None
+
+
+def budget_init(stage_cfg: dict) -> None:
+    global _BUDGET_LIMIT, _BUDGET_SPENT, _BUDGET_PATH
+    limit = int(stage_cfg.get("stage_token_budget") or 0)
+    if limit <= 0:
+        return
+    _BUDGET_LIMIT = limit
+    _BUDGET_PATH = RESULTS / "p4_v41_recovery" / "_budget.json"
+    if _BUDGET_PATH.exists():
+        try:
+            _BUDGET_SPENT = int(json.loads(_BUDGET_PATH.read_text()).get("spent", 0))
+        except Exception:
+            _BUDGET_SPENT = 0
+    print(f"[budget] limit={_BUDGET_LIMIT:,} spent={_BUDGET_SPENT:,}")
+
+
+def budget_can_start() -> bool:
+    if _BUDGET_LIMIT <= 0:
+        return True
+    with _BUDGET_LOCK:
+        return _BUDGET_SPENT < _BUDGET_LIMIT
+
+
+def budget_add(tokens: int) -> None:
+    global _BUDGET_SPENT
+    if _BUDGET_LIMIT <= 0:
+        return
+    with _BUDGET_LOCK:
+        _BUDGET_SPENT += max(0, int(tokens))
+        if _BUDGET_PATH is not None:
+            _BUDGET_PATH.parent.mkdir(parents=True, exist_ok=True)
+            _BUDGET_PATH.write_text(
+                json.dumps({"spent": _BUDGET_SPENT, "limit": _BUDGET_LIMIT})
+            )
 
 PROMPT_TEMPLATE = """# Instruction
 You are an expert in robotics control. Your primary goal is to create a single script containing an episode that reaches success:
@@ -41,6 +86,18 @@ You are an expert in robotics control. Your primary goal is to create a single s
 - meta.json: success status and num tries
 - episode.py: final script
 - video.mp4: recording
+"""
+
+TRIAL_BUDGET_BLOCK = """
+## Trial Budget (IMPORTANT)
+- You have {cap} tries. Each `env.reset()` consumes one try.
+- The first attempt is expected to fail. Do NOT stop after one failure.
+- You MUST NOT write `meta.json` with `"success": false` while tries remain.
+- If an attempt fails, inspect `open_fraction` / object poses, revise `episode.py`,
+  and run it again. Only stop early when `env.check_success()` returns true;
+  otherwise use every available try.
+- Write and run `episode.py` by turn 12. Do NOT spend more than 10 turns on
+  probe scripts. Iterate on `episode.py`, not on probes.
 """
 
 COACHING_BLOCK = """
@@ -101,14 +158,21 @@ def load_config() -> dict:
     return load_json(ROOT / "config.json", {})
 
 
-def active_provider() -> dict:
+def active_provider(name: str | None = None) -> dict:
     secrets = load_json(ROOT / "secrets.local.json", {})
     provs = secrets.get("providers", [])
     if not provs:
         sys.exit("secrets.local.json 缺少 providers")
-    idx = int(secrets.get("active", 0)) % len(provs)
-    p = dict(provs[idx])
-    p["index"] = idx
+    if name:
+        match = [p for p in provs if p.get("name") == name]
+        if not match:
+            sys.exit(f"secrets.local.json 里没有 provider: {name}")
+        p = dict(match[0])
+        p["index"] = provs.index(match[0])
+    else:
+        idx = int(secrets.get("active", 0)) % len(provs)
+        p = dict(provs[idx])
+        p["index"] = idx
     p["model"] = load_config().get("llm", {}).get("models", {}).get(p["name"], "")
     return p
 
@@ -168,6 +232,27 @@ def resolve_stage_tasks(stage: str, args) -> list[dict]:
         if args.all:
             return tasks
         sys.exit("p1_pilot 需要 --all / --sample / --task 之一")
+    if stage in ("p5_goal_obs_pilot", "p5b_goal_grasp_hint"):
+        picked = [t for t in tasks if t["suite"] == "libero_goal"]
+        if args.task:
+            want = set(args.task.split(","))
+            picked = [t for t in picked if t["task_id"] in want]
+        return picked
+    if stage == "p4_v41_recovery":
+        order_file = load_config()["stages"][stage].get(
+            "order_file", "results/p4_v41_recovery/ORDER.json"
+        )
+        order_path = ROOT / order_file
+        if not order_path.exists():
+            sys.exit(f"缺少预注册顺序文件 {order_path}；先跑 --freeze-order")
+        order = json.loads(order_path.read_text()).get("order", [])
+        by_id = {t["task_id"]: t for t in tasks}
+        picked = [by_id[tid] for tid in order if tid in by_id]
+        if args.task:
+            want = set(args.task.split(","))
+            picked = [t for t in picked if t["task_id"] in want]
+        print(f"[order] {len(picked)} 个任务（冻结顺序）")
+        return picked
     if stage in ("p2_baseline_retry", "p3_coaching_retry"):
         failed = [
             load_json(RESULTS / "p1_pilot" / t["task_id"] / "run.json", {})
@@ -190,12 +275,16 @@ def resolve_stage_tasks(stage: str, args) -> list[dict]:
 
 def build_prompt(task: dict, stage: str, cfg: dict) -> str:
     prompt = PROMPT_TEMPLATE.format(task_description=task["language"])
-    if stage.startswith("p1") or stage.startswith("p2") or stage.startswith("p3"):
+    if stage.startswith(("p1", "p2", "p3", "p4", "p5")):
         example_file = ROOT / "template" / "example_episode.py"
         if example_file.exists():
             prompt += EXAMPLE_BLOCK.format(example=example_file.read_text().strip())
-    if stage.startswith("p3"):
+    if stage.startswith("p3") or stage == "p4_v41_recovery":
         prompt += COACHING_BLOCK
+    if stage == "p4_v41_recovery":
+        prompt += TRIAL_BUDGET_BLOCK.format(
+            cap=cfg["stages"][stage].get("trial_cap", 10)
+        )
     return prompt
 
 
@@ -239,15 +328,29 @@ def wait_for_ram(min_avail_mb: int = 2200) -> None:
         time.sleep(30)
 
 
-def run_mcc(tdir: Path, prompt: str, cfg: dict, provider: dict, stage_cfg: dict) -> dict:
+def run_mcc(
+    tdir: Path,
+    prompt: str,
+    cfg: dict,
+    provider: dict,
+    stage_cfg: dict,
+    max_turns_override: int | None = None,
+    trace_name: str = "trace.jsonl",
+) -> dict:
     ws = tdir / "workspace"
+    timeout_min = int(stage_cfg.get("task_walltime_min") or cfg.get("task_walltime_min", 120))
+    session_budget = int(
+        stage_cfg.get("session_token_budget") or cfg.get("max_total_tokens", 1500000)
+    )
     env = os_environ_with(
         LLM_BASE_URL=provider["base_url"],
         LLM_API_KEY=provider["api_key"],
         LLM_MODEL=provider["model"],
-        MAX_TURNS=str(stage_cfg["max_turns"]),
-        MAX_TOTAL_TOKENS=str(cfg.get("max_total_tokens", 1500000)),
-        TRACE_PATH=str(tdir / "trace.jsonl"),
+        MAX_TURNS=str(max_turns_override or stage_cfg["max_turns"]),
+        MAX_TOKENS=str(stage_cfg.get("max_output_tokens", 4096)),
+        LLM_REQUEST_TIMEOUT=str(stage_cfg.get("request_timeout_s", 120)),
+        MAX_TOTAL_TOKENS=str(session_budget),
+        TRACE_PATH=str(tdir / trace_name),
         FAEA_STATE_PATH=str(tdir / "sim_state.json"),
     )
     wait_for_ram()
@@ -255,23 +358,39 @@ def run_mcc(tdir: Path, prompt: str, cfg: dict, provider: dict, stage_cfg: dict)
         cfg["mcc_python"], "main.py", "--task", prompt, "-y", "--root", str(ws)
     ]
     t0 = time.time()
+    proc = subprocess.Popen(
+        cmd, cwd=cfg["mcc_dir"], env=env,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        start_new_session=True,
+    )
     try:
-        proc = subprocess.run(
-            cmd, cwd=cfg["mcc_dir"], env=env,
-            timeout=cfg.get("task_walltime_min", 120) * 60,
-            capture_output=True, text=True, start_new_session=True,
-        )
+        stdout, stderr = proc.communicate(timeout=timeout_min * 60)
         return {
             "exit_code": proc.returncode,
-            "stdout_tail": proc.stdout[-4000:],
-            "stderr_tail": proc.stderr[-4000:],
+            "stdout_tail": (stdout or "")[-4000:],
+            "stderr_tail": (stderr or "")[-4000:],
             "wall_time_s": time.time() - t0,
             "timeout": False,
         }
     except subprocess.TimeoutExpired:
+        # 杀整个进程组，防 episode.py / probe 的仿真子进程残留
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        except Exception:
+            try:
+                proc.kill()
+            except Exception:
+                pass
+        try:
+            stdout, stderr = proc.communicate(timeout=60)
+        except Exception:
+            stdout, stderr = "", ""
         return {
-            "exit_code": -9, "stdout_tail": "", "stderr_tail": "TIMEOUT",
-            "wall_time_s": time.time() - t0, "timeout": True,
+            "exit_code": -9,
+            "stdout_tail": (stdout or "")[-4000:],
+            "stderr_tail": "TIMEOUT\n" + (stderr or "")[-4000:],
+            "wall_time_s": time.time() - t0,
+            "timeout": True,
         }
 
 
@@ -412,6 +531,19 @@ def run_one(task: dict, stage: str, cfg: dict, provider: dict, force: bool) -> d
         return load_json(tdir / "run.json")
 
     stage_cfg = cfg["stages"][stage]
+    if stage == "p4_v41_recovery" and not budget_can_start():
+        skip = {
+            "stage": stage, "suite": task["suite"], "task_id": task["task_id"],
+            "language": task["language"], "model": provider["model"],
+            "provider": provider["name"], "outcome": "deadline_skipped",
+            "detail": {"reason": "stage token budget exhausted"},
+            "turns": 0, "tokens_in": 0, "tokens_out": 0, "tries": 0,
+            "flagged": [], "ts": time.strftime("%F %T"),
+        }
+        tdir.mkdir(parents=True, exist_ok=True)
+        (tdir / "run.json").write_text(json.dumps(skip, indent=1, ensure_ascii=False))
+        print(f"[budget] skip {task['task_id']} (token budget exhausted)")
+        return skip
     cap = stage_cfg.get("trial_cap")
     tdir, prompt = prep_workspace(task, stage, cfg, cap)
     print(f"[run] {stage}/{task['task_id']} provider={provider['name']} cap={cap}")
@@ -421,21 +553,81 @@ def run_one(task: dict, stage: str, cfg: dict, provider: dict, force: bool) -> d
     (tdir / "trace.jsonl").write_text(trace_text or "")
 
     run.update(metrics)
+    budget_add(metrics.get("tokens_in", 0) + metrics.get("tokens_out", 0))
     outcome, detail = classify(tdir / "workspace", run, metrics)
 
-    # llm_failure（突发限流/瞬断）：轮换 provider 最多再试 2 次，每次前冷却 60s
+    # llm_failure（突发限流/瞬断）：严格模式不换模型，冷却后原 provider 重试；
+    # 已跑超过 5 分钟则不重启，避免把预算烧在从头再来上。
+    strict = bool(stage_cfg.get("strict_provider"))
     attempts = 0
-    while outcome == "llm_failure" and attempts < 2:
+    while outcome == "llm_failure" and attempts < 5:
+        if strict and run.get("wall_time_s", 0) > 600:
+            print(f"[defer] {task['task_id']} llm_failure after {run['wall_time_s']:.0f}s; not restarting")
+            break
         attempts += 1
-        provider = rotate_provider()
-        print(f"[retry {attempts}/2] {task['task_id']} with {provider['name']} after cooldown")
-        time.sleep(60)
+        cooldown = min(30 * (2 ** (attempts - 1)), 300)
+        if strict:
+            print(f"[retry {attempts}/5] {task['task_id']} same provider {provider['name']} after {cooldown}s")
+        else:
+            provider = rotate_provider()
+            print(f"[retry {attempts}/5] {task['task_id']} with {provider['name']} after {cooldown}s")
+        time.sleep(cooldown)
         tdir, prompt = prep_workspace(task, stage, cfg, cap)
         run = run_mcc(tdir, prompt, cfg, provider, stage_cfg)
         trace_text, metrics = collect_trace(tdir / "workspace", tdir)
         (tdir / "trace.jsonl").write_text(trace_text or "")
         run.update(metrics)
+        budget_add(metrics.get("tokens_in", 0) + metrics.get("tokens_out", 0))
         outcome, detail = classify(tdir / "workspace", run, metrics)
+
+    # 早退兜底：meta success=false 且 tries 未用完，在同一 workspace 继续会话，
+    # 不重置 try 计数，总 turn 预算仍为 stage_cfg["max_turns"]。
+    cont_rounds = 0
+    if stage == "p4_v41_recovery" and cap:
+        while (
+            outcome == "task_failed"
+            and (detail.get("meta") or {}).get("success") is False
+            and int((load_json(tdir / "sim_state.json", {}) or {}).get("try_count", 0)) < int(cap)
+            and cont_rounds < 2
+        ):
+            remaining_turns = int(stage_cfg["max_turns"]) - int(metrics.get("turns", 0))
+            if remaining_turns < 20:
+                break
+            tries_now = int((load_json(tdir / "sim_state.json", {}) or {}).get("try_count", 0))
+            meta_path = tdir / "workspace" / "meta.json"
+            if meta_path.exists():
+                meta_path.unlink()
+            if (tdir / "trace.jsonl").exists():
+                shutil.copy(tdir / "trace.jsonl", tdir / f"trace_attempt{cont_rounds + 1}.jsonl")
+            cont_prompt = (
+                "# Continue the task\n"
+                f"The task is: {task['language']}\n"
+                f"Your previous attempt ended with success=false after {tries_now} tries. "
+                f"You have {int(cap) - tries_now} tries left.\n"
+                "Do NOT write meta.json with success=false while tries remain. Read your "
+                "existing episode.py and probe files, diagnose the failure, revise episode.py, "
+                "and run it again. Use all remaining tries.\n"
+            )
+            print(f"[continue {cont_rounds + 1}/2] {task['task_id']} tries={tries_now}/{cap}")
+            cont = run_mcc(
+                tdir, cont_prompt, cfg, provider, stage_cfg,
+                max_turns_override=remaining_turns,
+            )
+            cont_trace, cont_metrics = collect_trace(tdir / "workspace", tdir)
+            (tdir / "trace.jsonl").write_text(cont_trace or "")
+            run["exit_code"] = cont.get("exit_code", run.get("exit_code"))
+            run["wall_time_s"] = run.get("wall_time_s", 0) + cont.get("wall_time_s", 0)
+            run["timeout"] = bool(cont.get("timeout", False))
+            for k in ("turns", "tokens_in", "tokens_out"):
+                metrics[k] = int(metrics.get(k, 0)) + int(cont_metrics.get(k, 0))
+            tc = dict(metrics.get("tool_calls") or {})
+            for k, v in (cont_metrics.get("tool_calls") or {}).items():
+                tc[k] = tc.get(k, 0) + v
+            metrics["tool_calls"] = tc
+            metrics["mcc_termination"] = cont_metrics.get("mcc_termination")
+            budget_add(cont_metrics.get("tokens_in", 0) + cont_metrics.get("tokens_out", 0))
+            outcome, detail = classify(tdir / "workspace", run, metrics)
+            cont_rounds += 1
 
     verified = None
     flagged = []
@@ -472,6 +664,9 @@ def run_one(task: dict, stage: str, cfg: dict, provider: dict, force: bool) -> d
         "tool_calls": metrics.get("tool_calls", {}),
         "tries": load_json(tdir / "sim_state.json", {}).get("try_count",
                  (detail.get("meta") or {}).get("num_tries", 0)),
+        "strict_provider": strict,
+        "timeout": bool(run.get("timeout", False)),
+        "restarts": attempts,
         "ts": time.strftime("%F %T"),
     }
     (tdir / "run.json").write_text(json.dumps(run_json, indent=1, ensure_ascii=False))
@@ -479,17 +674,80 @@ def run_one(task: dict, stage: str, cfg: dict, provider: dict, force: bool) -> d
     return run_json
 
 
+EXCLUDED_FINAL_FAILURES = {
+    "libero_90_26", "libero_90_28", "libero_90_54",
+    "libero_90_33", "libero_90_39", "libero_object_8",
+    "libero_goal_5", "libero_90_69",
+}
+
+
+def eligible_final_failures(tasks: list[dict]) -> list[dict]:
+    """旧 pilot + coaching 都没有干净成功的任务（72 个）。"""
+    out = []
+    for t in tasks:
+        tid = t["task_id"]
+        if tid in EXCLUDED_FINAL_FAILURES:
+            continue
+        r1 = load_json(RESULTS / "p1_pilot" / tid / "run.json", {})
+        r3 = load_json(RESULTS / "p3_coaching_retry" / tid / "run.json", {})
+        ok1 = str((r1 or {}).get("outcome", "")).startswith("success")
+        ok3 = str((r3 or {}).get("outcome", "")).startswith("success")
+        if not ok1 and not ok3:
+            out.append(t)
+    return out
+
+
+def freeze_order(cfg: dict, seed: int) -> None:
+    tasks = get_tasks()
+    eligible = eligible_final_failures(tasks)
+    suites = ("libero_object", "libero_spatial", "libero_goal", "libero_90")
+    buckets = {s: [t for t in eligible if t["suite"] == s] for s in suites}
+    rng = random.Random(seed)
+    for s in suites:
+        rng.shuffle(buckets[s])
+    order = []
+    while any(buckets.values()):
+        for s in suites:
+            if buckets[s]:
+                order.append(buckets[s].pop(0))
+    ids = [t["task_id"] for t in order]
+    payload = {
+        "seed": seed,
+        "generated_at": time.strftime("%F %T"),
+        "count": len(ids),
+        "eligible": sorted(t["task_id"] for t in eligible),
+        "excluded": sorted(EXCLUDED_FINAL_FAILURES),
+        "order": ids,
+    }
+    payload["sha256"] = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, ensure_ascii=False).encode()
+    ).hexdigest()
+    rel = cfg["stages"]["p4_v41_recovery"].get(
+        "order_file", "results/p4_v41_recovery/ORDER.json"
+    )
+    path = ROOT / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+    from collections import Counter
+    print(f"[order] frozen {len(ids)} tasks -> {path}")
+    print(f"[order] suites {dict(Counter(t['suite'] for t in order))}")
+    print(f"[order] sha256 {payload['sha256']}")
+
+
 # ---- main -----------------------------------------------------------------------
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", choices=["p0_prompt_dev", "p1_pilot", "p2_baseline_retry", "p3_coaching_retry"])
+    ap.add_argument("--stage", choices=["p0_prompt_dev", "p1_pilot", "p2_baseline_retry", "p3_coaching_retry", "p4_v41_recovery", "p5_goal_obs_pilot", "p5b_goal_grasp_hint"])
     ap.add_argument("--task", help="逗号分隔 task_id 或 p0 默认")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--sample", type=int, help="分层试点规模(10)")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--parallel", type=int, default=1, help="并发会话数（默认1=串行）")
     ap.add_argument("--refresh-tasks", action="store_true")
+    ap.add_argument("--provider", help="按名字选择 provider（如 intern）")
+    ap.add_argument("--freeze-order", action="store_true", help="冻结 M8 72 任务顺序")
+    ap.add_argument("--seed", type=int, default=20261021)
     args = ap.parse_args()
 
     cfg = load_config()
@@ -499,6 +757,9 @@ def main():
         for t in tasks:
             n[t["suite"]] = n.get(t["suite"], 0) + 1
         print(f"[tasks] {n}")
+        return
+    if args.freeze_order:
+        freeze_order(cfg, args.seed)
         return
     if not args.stage:
         ap.error("--stage 必填（或用 --refresh-tasks）")
@@ -514,7 +775,11 @@ def main():
         tasks = get_tasks()
 
     stage_tasks = resolve_stage_tasks(args.stage, args)
-    provider = active_provider()
+    provider = active_provider(args.provider)
+    stage_cfg = cfg["stages"][args.stage]
+    strict_stage = bool(stage_cfg.get("strict_provider"))
+    budget_init(stage_cfg)
+    print(f"[provider] {provider['name']} model={provider['model']} strict={strict_stage}")
     ok = 0
     n_par = max(1, int(args.parallel))
     if n_par == 1:
@@ -522,15 +787,19 @@ def main():
             r = run_one(t, args.stage, cfg, provider, args.force)
             if str(r.get("outcome", "")).startswith("success"):
                 ok += 1
-            provider = active_provider()
+            if not strict_stage:
+                provider = active_provider()
     else:
         from concurrent.futures import ThreadPoolExecutor, as_completed
         import threading
         lock = threading.Lock()
 
         def worker(t):
-            with lock:
-                prov = active_provider()
+            if strict_stage:
+                prov = provider
+            else:
+                with lock:
+                    prov = active_provider()
             return run_one(t, args.stage, cfg, prov, args.force)
 
         with ThreadPoolExecutor(max_workers=n_par) as ex:

@@ -42,6 +42,14 @@ env = LiberoEnv(task_id="{{TASK_ID}}")
   predicate other than `env.check_success()`.
 - The final `episode.py` must use `env.check_success()` as the success metric.
 - Do not cheat or reference other tasks.
-- A trial counter file (`.sim_state.json`) tracks your simulation attempts.
-  If a preset trial cap exists, exceeding it raises an error — stop and write
-  `meta.json` with your best result.
+- A trial counter tracks your simulation attempts. The authoritative values are
+  `obs["task_info"]["try_count"]` and `obs["task_info"]["trial_cap"]`; the
+  counter file may live outside this workspace. Do NOT search for or modify it.
+- **Every `reset()` counts as a try, including probes.** Before spending a try,
+  check `obs["task_info"]["try_count"]`, keep enough tries for the final
+  `episode.py`, and stop in time to write `meta.json` with your best result.
+- **Do NOT write `meta.json` with `"success": false` while tries remain.** If an
+  attempt fails, revise `episode.py` and run it again. The session must use all
+  available tries before reporting failure. Early failure is a protocol
+  violation and will be rejected. `success` must come from
+  `env.check_success()`, not from your own judgement.

@@ -2,7 +2,9 @@
   "llm": {
     "models": {
       "sensenova": "sensenova-6.8-flash-lite",
-      "agnes": "agnes-3.0-flash"
+      "agnes": "agnes-3.0-flash",
+      "intern": "deepseek-v4.1-flash-1017",
+      "intern_proxy": "deepseek-v4.1-flash-1017"
     }
   },
   "stages": {
@@ -21,6 +23,28 @@
     "p3_coaching_retry": {
       "max_turns": 120,
       "trial_cap": null
+    },
+    "p5_goal_obs_pilot": {
+      "max_turns": 100,
+      "trial_cap": 10,
+      "task_walltime_min": 120
+    },
+    "p5b_goal_grasp_hint": {
+      "max_turns": 100,
+      "trial_cap": 10,
+      "task_walltime_min": 120
+    },
+    "p4_v41_recovery": {
+      "max_turns": 100,
+      "trial_cap": 10,
+      "task_walltime_min": 120,
+      "session_token_budget": 3000000,
+      "stage_token_budget": 7900000,
+      "provider": "intern",
+      "strict_provider": true,
+      "order_file": "results/p4_v41_recovery/ORDER.json",
+      "max_output_tokens": 4096,
+      "request_timeout_s": 600
     }
   },
   "max_total_tokens": 6000000,

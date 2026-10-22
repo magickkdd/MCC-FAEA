@@ -70,6 +70,23 @@ try). Schema:
   "objects": {
     "<object_name>": {"pos": [x, y, z], "quat": [qx, qy, qz, qw]}
   },
+  "articulated_joints": {
+    "<joint_name>": {
+      "body": "<moving_body_name>",
+      "type": "slide",
+      "qpos": 0.0,
+      "range": [-0.16, 0.01],
+      "travel": 0.17,
+      "axis_world": [0.0, -1.0, 0.0],
+      "anchor_pos": [x, y, z],
+      "body_pos": [x, y, z],
+      "body_quat": [qx, qy, qz, qw],
+      "handle_pos": [x, y, z],
+      "handle_mesh": "<mesh_name_or_null>",
+      "open_fraction": 0.0588,
+      "opening_direction": [0.0, 1.0, 0.0]
+    }
+  },
   "task_info": {
     "task_id": "...", "language": "...",
     "try_count": 1, "trial_cap": 10, "step_count": 0
@@ -80,11 +97,66 @@ try). Schema:
 - `gripper_open`: 1.0 fully open, 0.0 fully closed.
 - `objects`: every movable object in the scene with its ground-truth pose.
   Use these ground-truth positions to plan grasps and verify progress.
+- `articulated_joints`: every non-robot slide/hinge joint in the scene
+  (drawers, doors, knobs). Empty object when the scene has none. Use this
+  instead of guessing joint kinematics from the task description.
+
+`articulated_joints` fields:
+
+- `body`: name of the moving link.
+- `type`: `"slide"` or `"hinge"`.
+- `qpos`: current joint value. **slide = meters along the axis; hinge = radians.**
+- `range`: `[min, max]` in the same units as `qpos`.
+- `travel`: `max - min`.
+- `open_fraction` (slide only): 0.0 = closed end, 1.0 = open end.
+- `opening_direction` (slide only): unit vector in world frame that the
+  handle moves when the joint opens.
+- `axis_world`: joint axis in world frame. For hinges, positive rotation
+  follows the right-hand rule around this axis.
+- `anchor_pos`: joint anchor in world frame.
+- `body_pos` / `body_quat`: world pose of the moving link.
+- `handle_pos`: estimated grasp/pull point, taken from the object's handle
+  mesh when available; otherwise the body's geometry center. Treat it as a
+  target estimate, not a ground-truth contact point.
+- `handle_mesh`: handle mesh name, or `null` when the fallback was used.
+- `handle_radius` (hinge only): distance from the joint axis to the handle.
+
+Typical use:
+
+```python
+aj = env.get_obs()["articulated_joints"]
+for name, j in aj.items():
+    if j["type"] == "slide" and j["open_fraction"] < 0.5:
+        grasp = j["handle_pos"]          # where to hook the gripper
+        pull = j["opening_direction"]    # direction to pull
+```
+
+### Handle grasp recipe (slide joints)
+
+For a drawer or similar slide handle, a reliable sequence is:
+
+1. Move to `handle_pos` plus a small offset **opposite** `opening_direction`,
+   so the gripper approaches the handle from its front side.
+2. Keep the end-effector z at `handle_pos[2]`. **Do not descend below the
+   handle**: the gripper will miss it and only push the drawer body.
+3. Orient the gripper so the fingers can straddle the handle bar, then close.
+4. Move along `opening_direction` while keeping the gripper closed, and watch
+   `open_fraction` rise. Stop when it is close to 1.0 or the task succeeds.
+
+A top-down grasp is usually wrong for a vertical drawer handle: it approaches
+from above the bar and cannot hook it. Prefer a horizontal approach along
+`-opening_direction`.
 
 The dicts returned by `reset()`, `step()` and `get_obs()` have EXACTLY the
 keys shown above — `eef_pos`, `eef_quat`, `gripper_open`, `objects`,
-`task_info`. There are no other keys (no `robot0_*` keys, no image keys).
-Images are only written to the video files, never returned in observations.
+`articulated_joints`, `task_info`. There are no other keys (no `robot0_*`
+keys, no image keys). Images are only written to the video files, never
+returned in observations.
+
+> Do NOT access `env._env`, `env._env.sim`, `sim.data`, `.qpos[...]`, or
+> import `mujoco`/`robosuite` directly. `articulated_joints` is the sanctioned
+> interface for joint state; bypassing it is treated as out-of-contract and
+> flagged by the audit.
 
 ## check_success() -> bool
 

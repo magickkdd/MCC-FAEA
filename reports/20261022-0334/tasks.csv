@@ -1,0 +1,2 @@
+stage,task_id,suite,outcome,flagged,tries,turns,tokens_in,tokens_out,wall_time_s,model,provider,language
+p5b_goal_grasp_hint,libero_goal_7,libero_goal,infra_env,,2,9,89851,2642,70.1,agnes-3.0-flash,agnes,turn on the stove

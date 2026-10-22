@@ -70,6 +70,7 @@ FAEA 将未修改的生产级 agent SDK（Claude Agent SDK + Opus 4.5）直接�
 | D14 | 动作空间 = 绝对末端位姿控制（7D） | 论文明言三基准共用 absolute EEF 抽象；M0 验证 robosuite OSC absolute 模式可用，不可用则登记偏差并降级 |
 | D15 | Prompt 用英文原文（论文 Fig.1 模板） | 忠实复现；任务描述取 LIBERO 官方英文指令 |
 | D16 | 模型 = 双平台 flash 档轮换：sensenova-6.8-flash-lite（主）→ agnes-3.0-flash（备） | 免费额度耐用优先；实测两模型 tools 均可用；限额时 `rotate_key.py` 切换，429 由 MCC 自带退避吸收 |
+| D26 | M8 前置：`get_obs()` 增加 `articulated_joints`（V13） | Goal 套件旧模型 0% 的直接病灶是看不到抽屉关节状态；先用免费模型在 Goal 10 上做 obs 消融，再决定是否进入强模型实验 |
 
 ---
 
@@ -205,11 +206,23 @@ ok = env.check_success()                            # env 原生成功谓词
   "eef_quat": [x, y, z, w],
   "gripper_open": 0.0~1.0,
   "objects": { "<object_name>": {"pos": [x,y,z], "quat": [x,y,z,w]} },
+  "articulated_joints": {
+    "<joint_name>": {
+      "body": "...", "type": "slide|hinge",
+      "qpos": 0.0, "range": [min, max], "travel": 0.17,
+      "axis_world": [x,y,z], "anchor_pos": [x,y,z],
+      "body_pos": [x,y,z], "body_quat": [x,y,z,w],
+      "handle_pos": [x,y,z], "handle_mesh": "...",
+      "open_fraction": 0.0, "opening_direction": [x,y,z]
+    }
+  },
   "task_info": { "task_description": "...", "try_count": 4, "trial_cap": 10 }
 }
 ```
 
 对象名与坐标语义以 M0 锁定后的 `docs/api.md` 为准。**不暴露**成功判定内部、目标位姿、BDD 谓词等任务语义信息。
+
+`articulated_joints` 为 M8 前置扩展（V13）：把抽屉/门/旋钮的关节类型、qpos、行程、世界系轴、锚点、把手位置作为**契约内观测**暴露，替代"模型反推 MJCF"。该字段不包含目标位姿或任务谓词。
 
 #### 4.1.4 try 计数与 trial cap
 
@@ -409,6 +422,7 @@ P3  coaching:   对 P1 失败任务 × 无 cap + tips 重试 → 恢复 R3（论
 | V10 | MCC 上下文压缩机制与 Claude SDK 原生机制不同 | token 曲线不可比 | 指标口径独立统计 |
 | V11 | （条件触发）absolute 控制不可用降级 delta | 违背论文抽象声明 | 触发时升级评审 |
 | V12 | 重试会话不继承历史上下文 | 论文未述 | 按"全新会话"最简解释 |
+| V13 | M8 前置：特权观测增加 `articulated_joints`（关节类型/qpos/行程/轴/锚点/把手） | 超出论文 obs schema；Goal 与铰接 Long 任务不再与论文严格同条件 | 先做 Goal 10 obs 消融；M8 报告单列；旧 40/120 结果不回溯、不混算 |
 
 新增偏差随做随登记，不允许静默偏离。
 
