@@ -1,0 +1,14 @@
+stage,task_id,suite,outcome,flagged,tries,turns,tokens_in,tokens_out,wall_time_s,model,provider,language
+p4_v41_recovery,libero_90_25,libero_90,infra_timeout,,5,51,842507,62701,7200.1,deepseek-v4.1-flash-1017,intern,put the black bowl on top of the cabinet
+p4_v41_recovery,libero_90_64,libero_90,llm_failure,,0,2,3927,89,4.3,deepseek-v4.1-flash-1017,intern,stack the right bowl on the left bowl and place them in the tray
+p4_v41_recovery,libero_90_80,libero_90,llm_failure,,0,1,0,0,2.2,deepseek-v4.1-flash-1017,intern,pick up the book and place it in the right compartment of the caddy
+p4_v41_recovery,libero_goal_1,libero_goal,max_turns,,9,100,1935737,45153,1323.1,deepseek-v4.1-flash-1017,intern,put the bowl on the stove
+p4_v41_recovery,libero_object_1,libero_object,success_verified,,7,29,447820,24570,822.3,deepseek-v4.1-flash-1017,intern,pick up the cream cheese and place it in the basket
+p4_v41_recovery,libero_spatial_0,libero_spatial,success_verified,,5,55,989729,37527,2935.1,deepseek-v4.1-flash-1017,intern,pick up the black bowl between the plate and the ramekin and place it on the plate
+p4_v41_recovery,libero_spatial_1,libero_spatial,success_verified,,4,21,255824,15129,1308.4,deepseek-v4.1-flash-1017,intern,pick up the black bowl next to the ramekin and place it on the plate
+p4_v41_recovery,libero_spatial_2,libero_spatial,success_verified,,6,23,353523,16394,557.7,deepseek-v4.1-flash-1017,intern,pick up the black bowl from table center and place it on the plate
+p4_v41_recovery,libero_spatial_4,libero_spatial,success_verified,,4,24,357344,24149,1685.0,deepseek-v4.1-flash-1017,intern,pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate
+p4_v41_recovery,libero_spatial_5,libero_spatial,success_verified,,7,29,442610,26179,2888.5,deepseek-v4.1-flash-1017,intern,pick up the black bowl on the ramekin and place it on the plate
+p4_v41_recovery,libero_spatial_6,libero_spatial,task_failed,,1,15,183010,7560,401.1,deepseek-v4.1-flash-1017,intern,pick up the black bowl next to the cookie box and place it on the plate
+p4_v41_recovery,libero_spatial_7,libero_spatial,llm_failure,,3,45,540584,21240,1654.6,deepseek-v4.1-flash-1017,intern,pick up the black bowl on the stove and place it on the plate
+p4_v41_recovery,libero_spatial_8,libero_spatial,task_failed,,10,48,842898,31684,0,deepseek-v4.1-flash-1017,intern,pick up the black bowl at the front and place it on the plate

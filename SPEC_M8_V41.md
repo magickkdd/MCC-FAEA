@@ -543,3 +543,43 @@ python3 report.py --stage p4_v41_recovery
 | 主结果 | 40/120 = 33.3% | 不替换 | 辅助实验 |
 
 以上差异在报告中全部披露。
+
+---
+
+## 15. 终止与最终统计（2026-10-22 23:53）
+
+用户于 23:53 指示停止继续测试 DeepSeek，实验在此终止。最终只尝试 13/72，**不构成 72 任务恢复率**。
+
+### 15.1 有效会话（剔除 llm_failure / infra_timeout）
+
+| 套件 | 成功 / 有效 | 任务 |
+|---|---|---|
+| Spatial | 5/7 | `spatial_0/1/2/4/5` 成功；`spatial_6/8` task_failed |
+| Object | 1/1 | `object_1` |
+| Goal | 0/1 | `goal_1` max_turns |
+| Long | 0/0 | 无有效会话 |
+| **合计** | **6/9 = 66.7%** | Wilson 95% CI 约 [35.4%, 87.1%] |
+
+### 15.2 无效会话与停机原因
+
+| 任务 | 结果 | 说明 |
+|---|---|---|
+| `spatial_7` | llm_failure | 45 轮 / 3 tries 后请求失败 |
+| `90_25` | infra_timeout | 跑满 120 分钟 / 51 轮 / 5 tries，842K tokens，未完成 |
+| `90_80`、`90_64` | llm_failure | 首请求即 `429 Channel rate limit`，0–3.9K tokens |
+| `90_42` | 手动终止 | 限流重试中被停止，未落 run.json |
+
+自约 19:00 起端点持续返回 `429 Channel rate limit reached for model`。实测 5–800 token 的小请求偶尔返回 200，但 3K 级请求全部被拒，故自动续跑多次触发失败。23:53 用户指示停止。
+
+### 15.3 预算
+
+- 预算计数：5,953,126 / 7,900,000（tokens_in + tokens_out）
+- 新 key 估算剩余约 2.4M，未继续消耗
+- 所有进程已终止，无残留 runner / 探测守护
+
+### 15.4 结论边界
+
+1. 在非铰接的 Spatial/Object 任务上，V4.1-Flash 相对旧免费档有明显恢复：旧模型在 `spatial_0/1/2/4/5`、`object_1` 上均为 0，新模型 6 个全部 `success_verified`。
+2. Goal 与 Long 没有形成可比较样本：Goal 已知瓶颈是铰接把手的可达/抓取，Long 本轮被 429 与 120 分钟 wall time 阻断。
+3. 因此只能表述为“旧模型失败集上、非铰接子集的恢复信号”，不能外推为 72 任务恢复率，更不能替换主结果 40/120 = 33.3%。
+4. 分支与主线：二阶段改动位于 `experiment/m8-v41-recovery`，`main` 保持阶段一终版。
