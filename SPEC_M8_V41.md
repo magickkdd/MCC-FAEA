@@ -583,3 +583,14 @@ python3 report.py --stage p4_v41_recovery
 2. Goal 与 Long 没有形成可比较样本：Goal 已知瓶颈是铰接把手的可达/抓取，Long 本轮被 429 与 120 分钟 wall time 阻断。
 3. 因此只能表述为“旧模型失败集上、非铰接子集的恢复信号”，不能外推为 72 任务恢复率，更不能替换主结果 40/120 = 33.3%。
 4. 分支与主线：二阶段改动位于 `experiment/m8-v41-recovery`，`main` 保持阶段一终版。
+
+### 15.5 第二轮恢复尝试与最终停止（2026-10-23 00:00–12:26）
+
+第一把 key 之后，先后换用两把新 key（key2、key3），均指向同一个 `intern` 端点。结论：
+
+- 三把 key 在同一时刻返回完全相同的 `429 Channel rate limit reached`，说明限流在共享通道层，不是单 key 额度
+- 00:00 与 08:45 探针偶发 200，但真实 3K 请求立即 429；5 token 小请求同样 429，可排除“请求体过大”
+- 期间 13 个 Long 任务只落 `llm_failure`（1 轮 / 0 tokens），无新增有效会话
+- key2 实际消耗 4,004 tokens；key3 未启用；key1 计数另存 `_budget_key1.json`
+- 12:26 用户指示停止自动恢复脚本，评测终止，无残留进程
+- 有效结果不变：6/9 = 66.7%（Spatial 5/7、Object 1/1、Goal 0/1、Long 无有效会话）
